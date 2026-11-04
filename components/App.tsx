@@ -66,6 +66,12 @@ function readHash(): ScreenId | null {
   return h in SCREENS ? h : null;
 }
 
+const FLAT = MAP.flatMap((s) => s.items);
+
+function rootStack(id: ScreenId): ScreenId[] {
+  return id === "welcome" ? ["welcome"] : id === "home" ? ["home"] : ["home", id];
+}
+
 export default function App() {
   const [stack, setStack] = useState<ScreenId[]>(["welcome"]);
   const [booking, setBookingState] = useState<Booking>(DEFAULT_BOOKING);
@@ -75,23 +81,27 @@ export default function App() {
 
   const current = stack[stack.length - 1];
 
-  // deep-link via #screenId
+  // Deep-link via #screenId, and sync with browser history so the phone's
+  // back gesture / back button walks back through the prototype.
   useEffect(() => {
     const h = readHash();
-    if (h) setStack(h === "welcome" ? ["welcome"] : ["home", h].filter((x, i, a) => a.indexOf(x) === i) as ScreenId[]);
-    const onHash = () => { const x = readHash(); if (x) setStack((s) => (s[s.length - 1] === x ? s : [...s, x])); };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    if (h) setStack(rootStack(h));
+    history.replaceState(null, "", `#${h ?? "welcome"}`);
+    const onPop = () => {
+      const target = readHash() ?? "welcome";
+      setStack((s) => {
+        const i = s.lastIndexOf(target);
+        return i >= 0 ? s.slice(0, i + 1) : rootStack(target);
+      });
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
-  const hydrated = useRef(false);
-  useEffect(() => {
-    if (!hydrated.current) { hydrated.current = true; return; }
-    if (window.location.hash.slice(1) !== current) history.replaceState(null, "", `#${current}`);
-  }, [current]);
 
-  const go = useCallback((id: ScreenId) => setStack((s) => [...s, id]), []);
-  const back = useCallback(() => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s)), []);
-  const reset = useCallback((id: ScreenId) => setStack(id === "home" ? ["home"] : ["home", id]), []);
+  const push = (id: ScreenId) => history.pushState(null, "", `#${id}`);
+  const go = useCallback((id: ScreenId) => { push(id); setStack((s) => [...s, id]); }, []);
+  const back = useCallback(() => { if (stack.length > 1) history.back(); }, [stack.length]);
+  const reset = useCallback((id: ScreenId) => { push(id); setStack(rootStack(id)); }, []);
   const toast = useCallback((msg: string) => {
     setToastMsg(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -101,8 +111,33 @@ export default function App() {
 
   const jump = (id: ScreenId) => {
     setSheet(false);
-    setStack(id === "welcome" ? ["welcome"] : id === "home" ? ["home"] : ["home", id]);
+    if (id !== current) reset(id);
   };
+
+  const idx = FLAT.findIndex((x) => x.id === current);
+  const meta = FLAT[idx];
+  const step = (d: number) => {
+    const n = FLAT[idx + d];
+    if (n) jump(n.id);
+  };
+
+  // desktop: arrow keys flip through screens
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowRight") step(1);
+      if (e.key === "ArrowLeft") step(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // keep the active row visible when the sheet opens
+  const activeRow = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (sheet) activeRow.current?.scrollIntoView({ block: "center" });
+  }, [sheet]);
 
   const Screen = SCREENS[current];
 
@@ -112,7 +147,7 @@ export default function App() {
         <div key={s.section}>
           <h2>{s.section}</h2>
           {s.items.map((it) => (
-            <button key={it.id} className={current === it.id ? "on" : ""} onClick={() => jump(it.id)}>
+            <button key={it.id} ref={current === it.id ? activeRow : undefined} className={current === it.id ? "on" : ""} onClick={() => jump(it.id)}>
               <span className="num">{it.num}</span>
               <span className="grow">{it.name}</span>
               {it.edge && <span className="badge">EDGE</span>}
@@ -126,14 +161,33 @@ export default function App() {
   return (
     <Nav.Provider value={{ go, back, reset, toast, booking, setBooking }}>
       <div className="stage">
+        <div className="protobar">
+          <button aria-label="Previous screen" disabled={idx <= 0} onClick={() => step(-1)}>‹</button>
+          <button className="protobar-title" onClick={() => setSheet(true)}>
+            <span className="num">{meta?.num}</span>
+            <span className="name">{meta?.name}</span>
+            {meta?.edge && <span className="badge">EDGE</span>}
+            <span className="caret">▾</span>
+          </button>
+          <button aria-label="Next screen" disabled={idx >= FLAT.length - 1} onClick={() => step(1)}>›</button>
+        </div>
         <div className="phone">
           <Screen key={`${current}-${stack.length}`} />
           {toastMsg && <div className="toast">{toastMsg}</div>}
         </div>
         {navigator}
       </div>
-      <button className="fab" aria-label="All screens" onClick={() => setSheet(true)}>☰</button>
-      {sheet && <div className="sheet-bg" onClick={() => setSheet(false)}>{navigator}</div>}
+      {sheet && (
+        <div className="sheet-bg" onClick={() => setSheet(false)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <b>All screens</b>
+              <button onClick={() => setSheet(false)} aria-label="Close">✕</button>
+            </div>
+            {navigator}
+          </div>
+        </div>
+      )}
     </Nav.Provider>
   );
 }
