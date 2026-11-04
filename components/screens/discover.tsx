@@ -13,6 +13,85 @@ const SERVICES = [
   { name: "Wellness check", price: "from [$XX]/visit" },
 ];
 
+
+type ServiceDetail = {
+  tasks: { t: string; on: boolean }[];
+  note: string;
+  meds: boolean;
+  where: { label: string; placeholder: string };
+};
+
+/** What a visit looks like for each category: default checklist, note and address field. */
+const SERVICE_DETAILS: Record<string, ServiceDetail> = {
+  "Companionship": {
+    tasks: [
+      { t: "Chat and catch up over tea", on: true },
+      { t: "Go for a short walk together", on: true },
+      { t: "Play cards or a board game", on: true },
+      { t: "Help her video-call the family", on: false },
+    ],
+    note: "She loves talking about her garden and old Hindi films. Uses a cane on stairs. Door code [####].",
+    meds: false,
+    where: { label: "Visit address", placeholder: "Mom's home · [Address]" },
+  },
+  "Appointment escort": {
+    tasks: [
+      { t: "Pick Mom up from home", on: true },
+      { t: "Stay with her during the appointment", on: true },
+      { t: "Take notes from the doctor", on: true },
+      { t: "Pharmacy pickup on the way back", on: false },
+    ],
+    note: "She likes to chat. Uses a cane on stairs. Door code [####].",
+    meds: true,
+    where: { label: "Clinic address", placeholder: "[Clinic name and address]" },
+  },
+  "Errands": {
+    tasks: [
+      { t: "Grocery run from Mom's list", on: true },
+      { t: "Pharmacy pickup", on: true },
+      { t: "Put groceries away at home", on: true },
+      { t: "Post office drop-off", on: false },
+    ],
+    note: "Shopping list is on the fridge. She prefers [Store name]. Keep the receipts. Door code [####].",
+    meds: false,
+    where: { label: "Stores to visit", placeholder: "[Store names or addresses]" },
+  },
+  "Tech help": {
+    tasks: [
+      { t: "Set up video calls on her phone", on: true },
+      { t: "Make the text bigger", on: true },
+      { t: "Show her how to open family photos", on: true },
+      { t: "Block spam calls", on: false },
+    ],
+    note: "She has an Android phone and an iPad. Please write the steps down on paper so she can look back.",
+    meds: false,
+    where: { label: "Visit address", placeholder: "Mom's home · [Address]" },
+  },
+  "Home help": {
+    tasks: [
+      { t: "Tidy the kitchen and living room", on: true },
+      { t: "Laundry: wash and fold", on: true },
+      { t: "Take out the trash", on: true },
+      { t: "Change the bed sheets", on: false },
+    ],
+    note: "Cleaning supplies are under the sink. Please don't move things on her prayer shelf.",
+    meds: false,
+    where: { label: "Visit address", placeholder: "Mom's home · [Address]" },
+  },
+  "Wellness check": {
+    tasks: [
+      { t: "Check she has eaten today", on: true },
+      { t: "Make sure she took her morning meds", on: true },
+      { t: "Look around for trip hazards", on: true },
+      { t: "Check the fridge for expired food", on: false },
+    ],
+    note: "She can get dizzy in the mornings. Call me right away if anything seems off.",
+    meds: true,
+    where: { label: "Visit address", placeholder: "Mom's home · [Address]" },
+  },
+};
+const detailFor = (service: string) => SERVICE_DETAILS[service] ?? SERVICE_DETAILS["Appointment escort"];
+
 export function TabBar({ active }: { active: "Home" | "Visits" | "Family" | "Account" }) {
   const { reset, toast, booking } = useNav();
   const tabs = ["Home", "Visits", "Family", "Account"] as const;
@@ -160,8 +239,8 @@ export function Booking() {
             <button key={x} className={`opt pill ${hours === x ? "on" : ""}`} onClick={() => setHours(x)}>{x} {x === 1 ? "hr" : "hrs"}</button>
           ))}
         </div>
-        <div className="label">Clinic address</div>
-        <input className="input" placeholder="[Clinic name and address]" />
+        <div className="label">{detailFor(booking.service).where.label}</div>
+        <input className="input" placeholder={detailFor(booking.service).where.placeholder} />
       </div>
       <div className="footer row">
         <div>
@@ -385,24 +464,20 @@ export function HelperProfile() {
 }
 
 export function Checklist() {
-  const { go } = useNav();
+  const { go, booking } = useNav();
   const h = useHelper();
-  const [tasks, setTasks] = useState([
-    { t: "Pick Mom up from home", on: true },
-    { t: "Stay with her during the appointment", on: true },
-    { t: "Take notes from the doctor", on: true },
-    { t: "Pharmacy pickup on the way back", on: false },
-  ]);
-  const [meds, setMeds] = useState(true);
+  const detail = detailFor(booking.service);
+  const [tasks, setTasks] = useState(detail.tasks);
+  const [meds, setMeds] = useState(detail.meds);
   const [photos, setPhotos] = useState(true);
   const [adding, setAdding] = useState("");
 
   return (
     <div className="screen">
-      <TopBar title={`What should ${h.short} do?`} />
+      <TopBar title={`What should ${h.short} do?`} sub={booking.service} />
       <div className="body">
         <div>
-          <div className="label" style={{ margin: 0 }}>Visit checklist</div>
+          <div className="label" style={{ margin: 0 }}>{booking.service} checklist</div>
           <div className="muted small" style={{ marginTop: 3 }}>{h.short} ticks these off live during the visit</div>
         </div>
         <div className="list">
@@ -423,7 +498,7 @@ export function Checklist() {
           </div>
         </div>
         <div className="label">Notes for {h.short}</div>
-        <textarea className="textarea" defaultValue="She likes to chat. Uses a cane on stairs. Door code [####]." style={{ minHeight: 110 }} />
+        <textarea className="textarea" defaultValue={detail.note} style={{ minHeight: 110 }} />
         <button className="toggle-row" onClick={() => setMeds(!meds)}>Share Mom&apos;s medication list <Check on={meds} /></button>
         <button className="toggle-row" onClick={() => setPhotos(!photos)}>Send photo updates during the visit <Check on={photos} /></button>
       </div>
