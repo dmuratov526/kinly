@@ -34,6 +34,8 @@ export const PEOPLE: Record<string, FaceSpec> = {
   sunita: { skin: SKIN.tan, hair: HAIR.black, style: "bun", shirt: P.sageDeep, bg: P.sage },
   priya: { skin: SKIN.mid, hair: HAIR.brown, style: "long", shirt: P.skyDeep, bg: P.sky },
   meera: { skin: SKIN.deep, hair: HAIR.black, style: "bob", shirt: P.peachDeep, bg: P.peach },
+  lakshmi: { skin: SKIN.tan, hair: HAIR.grey, style: "bun", shirt: "#c98a5a", bg: P.sand },
+  grace: { skin: SKIN.deep, hair: HAIR.black, style: "short", shirt: "#8f86b8", bg: P.lilac },
   kamala: { skin: SKIN.mid, hair: HAIR.silver, style: "bun", shirt: "#b58db8", bg: P.lilac, glasses: true },
   rohan: { skin: SKIN.mid, hair: HAIR.black, style: "short", shirt: "#4b5563", bg: P.sand, beard: true },
   anita: { skin: SKIN.mid, hair: HAIR.brown, style: "bob", shirt: P.peachDeep, bg: P.cream },

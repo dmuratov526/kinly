@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { Nav, type Booking, type ScreenId } from "./ui";
 import { CareProfile, Verify, Welcome } from "./screens/onboarding";
-import { Booking as BookingScreen, Checklist, HelperProfile, Helpers, Home } from "./screens/discover";
+import { Available, Booking as BookingScreen, Checklist, HelperProfile, Helpers, Home } from "./screens/discover";
 import { Confirmed, Pay, PayFailed } from "./screens/payment";
 import { HelperCancelled, MomView, Reschedule } from "./screens/before";
 import { Emergency, ExtraTime, InProgress, PinMismatch, Tracking } from "./screens/dayof";
@@ -11,7 +11,7 @@ import { LowRating, Rate, Report, Weekly } from "./screens/after";
 
 const SCREENS: Record<ScreenId, ComponentType> = {
   welcome: Welcome, verify: Verify, profile: CareProfile,
-  home: Home, booking: BookingScreen, helpers: Helpers, helper: HelperProfile, checklist: Checklist,
+  home: Home, booking: BookingScreen, helpers: Helpers, available: Available, helper: HelperProfile, checklist: Checklist,
   pay: Pay, payFailed: PayFailed, confirmed: Confirmed,
   momView: MomView, helperCancelled: HelperCancelled, reschedule: Reschedule,
   tracking: Tracking, pinMismatch: PinMismatch, inProgress: InProgress, extraTime: ExtraTime, emergency: Emergency,
@@ -26,38 +26,39 @@ const MAP: { section: string; items: { id: ScreenId; num: string; name: string; 
   ] },
   { section: "2. Discover and choose", items: [
     { id: "home", num: "04", name: "Home" },
-    { id: "booking", num: "05", name: "Booking options" },
-    { id: "helpers", num: "06", name: "Choose a helper" },
+    { id: "helpers", num: "05", name: "Browse helpers" },
+    { id: "available", num: "06", name: "Search by time" },
     { id: "helper", num: "07", name: "Helper profile" },
-    { id: "checklist", num: "08", name: "Visit checklist" },
+    { id: "booking", num: "08", name: "Pick a time" },
+    { id: "checklist", num: "09", name: "Visit checklist" },
   ] },
   { section: "3. Payment", items: [
-    { id: "pay", num: "09", name: "Review and pay" },
-    { id: "payFailed", num: "09b", name: "Payment failed", edge: true },
-    { id: "confirmed", num: "10", name: "Booking confirmed" },
+    { id: "pay", num: "10", name: "Review and pay" },
+    { id: "payFailed", num: "10b", name: "Payment failed", edge: true },
+    { id: "confirmed", num: "11", name: "Booking confirmed" },
   ] },
   { section: "4. Before the visit", items: [
-    { id: "momView", num: "11", name: "Mom's view" },
-    { id: "helperCancelled", num: "11b", name: "Helper cancelled", edge: true },
-    { id: "reschedule", num: "11c", name: "Reschedule or cancel", edge: true },
+    { id: "momView", num: "12", name: "Mom's view" },
+    { id: "helperCancelled", num: "12b", name: "Helper cancelled", edge: true },
+    { id: "reschedule", num: "12c", name: "Reschedule or cancel", edge: true },
   ] },
   { section: "5. Day of visit", items: [
-    { id: "tracking", num: "12", name: "Live tracking" },
-    { id: "pinMismatch", num: "12b", name: "PIN mismatch", edge: true },
-    { id: "inProgress", num: "13", name: "Visit in progress" },
-    { id: "extraTime", num: "13b", name: "Extra time request", edge: true },
-    { id: "emergency", num: "13c", name: "Emergency", edge: true },
+    { id: "tracking", num: "13", name: "Live tracking" },
+    { id: "pinMismatch", num: "13b", name: "PIN mismatch", edge: true },
+    { id: "inProgress", num: "14", name: "Visit in progress" },
+    { id: "extraTime", num: "14b", name: "Extra time request", edge: true },
+    { id: "emergency", num: "14c", name: "Emergency", edge: true },
   ] },
   { section: "6. After the visit", items: [
-    { id: "report", num: "14", name: "Visit report" },
-    { id: "rate", num: "15", name: "Rate and tip" },
-    { id: "lowRating", num: "15b", name: "Low rating follow-up", edge: true },
-    { id: "weekly", num: "16", name: "Weekly visits" },
+    { id: "report", num: "15", name: "Visit report" },
+    { id: "rate", num: "16", name: "Rate and tip" },
+    { id: "lowRating", num: "16b", name: "Low rating follow-up", edge: true },
+    { id: "weekly", num: "17", name: "Weekly visits" },
   ] },
 ];
 
 const DEFAULT_BOOKING: Booking = {
-  service: "Appointment escort", day: "Thu 30", time: "10:00 AM", hours: 3, helperId: "sunita", booked: false,
+  service: "Appointment escort", day: "Thu 30", time: "10:00 AM", hours: 3, helperId: "sunita", scheduled: false, booked: false,
 };
 
 function readHash(): ScreenId | null {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar, Btn, Check, Chip, HELPERS, Radio, TopBar, useHelper, useNav, useMulti } from "../ui";
+import { Avatar, Btn, Check, Chip, HELPERS, TopBar, useHelper, useNav, useMulti, type Helper } from "../ui";
 import { EmptyCalendar, Face, ServiceIcon, VideoCover } from "../illustrations";
 
 const SERVICES = [
@@ -62,13 +62,17 @@ export function Home() {
               key={s.name}
               className={`card ${s.name === "Appointment escort" ? "sel" : ""}`}
               style={{ textAlign: "left", minHeight: 108, display: "flex", flexDirection: "column", gap: 6 }}
-              onClick={() => { setBooking({ service: s.name }); go("booking"); }}
+              onClick={() => { setBooking({ service: s.name, scheduled: false }); go("helpers"); }}
             >
               <ServiceIcon name={s.name} />
               <b style={{ fontSize: 15, marginTop: 6 }}>{s.name}</b>
               <span className="muted small">{s.price}</span>
             </button>
           ))}
+        </div>
+        <div className="grid g2">
+          <Btn kind="secondary" onClick={() => go("helpers")}>⌕ Browse helpers</Btn>
+          <Btn kind="secondary" onClick={() => go("available")}>◷ Search by time</Btn>
         </div>
         <div className="label" style={{ marginTop: 6 }}>Upcoming</div>
         {booking.booked ? (
@@ -89,26 +93,39 @@ export function Home() {
   );
 }
 
+const DAYS = [["Tue", "28"], ["Wed", "29"], ["Thu", "30"], ["Fri", "31"], ["Sat", "1"]];
+const TIMES = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
+
+/** 08 · Pick a time with the helper already chosen; slots follow that helper's calendar. */
 export function Booking() {
-  const { go, booking, setBooking } = useNav();
+  const { go, back, booking, setBooking } = useNav();
+  const h = useHelper();
+  const freeDays = DAYS.map(([d, n]) => `${d} ${n}`).filter((v) => !h.daysOff.includes(v));
+  const freeTimes = TIMES.filter((t) => !h.busy.includes(t));
   const [mode, setMode] = useState("Schedule");
-  const [day, setDay] = useState("Thu 30");
-  const [time, setTime] = useState("10:00 AM");
-  const [hours, setHours] = useState(3);
-  const [find, setFind] = useState<"auto" | "browse">("browse");
-  const days = [["Tue", "28"], ["Wed", "29"], ["Thu", "30"], ["Fri", "31"], ["Sat", "1"]];
-  const times = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
+  // start on the booking's slot if this helper is free then, otherwise their first open slot
+  const [day, setDay] = useState(freeDays.includes(booking.day) ? booking.day : (freeDays[0] ?? booking.day));
+  const [time, setTime] = useState(freeTimes.includes(booking.time) ? booking.time : (freeTimes[0] ?? booking.time));
+  const [hours, setHours] = useState(booking.hours);
+  const canBook = freeDays.includes(day) && freeTimes.includes(time);
 
   const next = () => {
-    setBooking({ day, time, hours });
-    if (find === "auto") { setBooking({ day, time, hours, helperId: "sunita" }); go("helper"); }
-    else go("helpers");
+    setBooking({ day, time, hours, scheduled: true });
+    go("checklist");
   };
 
   return (
     <div className="screen">
-      <TopBar title={booking.service} />
+      <TopBar title={`Book ${h.short}`} sub={booking.service} />
       <div className="body">
+        <div className="card row" style={{ padding: "10px 12px" }}>
+          <Avatar size={40} who={h.id} />
+          <div className="grow">
+            <b style={{ fontSize: 15 }}>{h.name}</b>
+            <div className="muted small">★ {h.rating} · Next free {h.next}</div>
+          </div>
+          <button className="link" onClick={back}>Change</button>
+        </div>
         <div className="seg">
           {["Now", "Schedule", "Recurring"].map((m) => (
             <button key={m} className={mode === m ? "on" : ""} onClick={() => { setMode(m); if (m === "Recurring") go("weekly"); }}>{m}</button>
@@ -116,72 +133,195 @@ export function Booking() {
         </div>
         <div className="label">Date</div>
         <div className="grid g5">
-          {days.map(([d, n]) => {
+          {DAYS.map(([d, n]) => {
             const v = `${d} ${n}`;
-            return <button key={v} className={`opt ${day === v ? "on" : ""}`} onClick={() => setDay(v)}>{d}<br />{n}</button>;
+            const off = h.daysOff.includes(v);
+            return (
+              <button key={v} className={`opt ${day === v ? "on" : ""}`} disabled={off} onClick={() => setDay(v)}>
+                {d}<br />{off ? "off" : n}
+              </button>
+            );
           })}
         </div>
-        <div className="label">Start time</div>
+        <div className="label">{h.short}&apos;s open times</div>
         <div className="grid g3">
-          {times.map((t) => (
-            <button key={t} className={`opt ${time === t ? "on" : ""}`} disabled={t === "3:00 PM"} onClick={() => setTime(t)}>
-              {t === "3:00 PM" ? "3:00 PM full" : t}
-            </button>
-          ))}
+          {TIMES.map((t) => {
+            const busy = h.busy.includes(t);
+            return (
+              <button key={t} className={`opt ${time === t ? "on" : ""}`} disabled={busy} onClick={() => setTime(t)}>
+                {busy ? `${t} booked` : t}
+              </button>
+            );
+          })}
         </div>
         <div className="label">Duration</div>
         <div className="grid g4">
-          {[1, 2, 3, 4].map((h) => (
-            <button key={h} className={`opt pill ${hours === h ? "on" : ""}`} onClick={() => setHours(h)}>{h} {h === 1 ? "hr" : "hrs"}</button>
+          {[1, 2, 3, 4].map((x) => (
+            <button key={x} className={`opt pill ${hours === x ? "on" : ""}`} onClick={() => setHours(x)}>{x} {x === 1 ? "hr" : "hrs"}</button>
           ))}
         </div>
         <div className="label">Clinic address</div>
         <input className="input" placeholder="[Clinic name and address]" />
-        <div className="label">How should we find a helper?</div>
-        <button className={`radio-card ${find === "auto" ? "on" : ""}`} onClick={() => setFind("auto")}><Radio on={find === "auto"} /> Auto-match the best fit</button>
-        <button className={`radio-card ${find === "browse" ? "on" : ""}`} onClick={() => setFind("browse")}><Radio on={find === "browse"} /> Let me browse helpers</button>
       </div>
       <div className="footer row">
         <div>
           <div className="small muted">Estimate</div>
           <b style={{ fontSize: 18 }}>[$XX]</b>
         </div>
-        <Btn style={{ flex: 1 }} onClick={next}>{find === "auto" ? "Match me" : "See helpers"}</Btn>
+        <Btn style={{ flex: 1 }} disabled={!canBook} onClick={next}>Continue</Btn>
       </div>
     </div>
   );
 }
 
+const FILTERS = ["Available today", "Speaks Hindi", "Rating 4.8+", "CPR certified", "Within 2 mi"] as const;
+type Filter = (typeof FILTERS)[number];
+const FILTER_FN: Record<Filter, (h: Helper) => boolean> = {
+  "Available today": (h) => h.today,
+  "Speaks Hindi": (h) => h.langs.includes("Hindi"),
+  "Rating 4.8+": (h) => h.rating >= 4.8,
+  "CPR certified": (h) => h.cpr,
+  "Within 2 mi": (h) => h.miles <= 2,
+};
+const SORTS: { name: string; fn: (a: Helper, b: Helper) => number }[] = [
+  { name: "Best match", fn: (a, b) => b.match - a.match },
+  { name: "Highest rated", fn: (a, b) => b.rating - a.rating || b.visits - a.visits },
+  { name: "Nearest", fn: (a, b) => a.miles - b.miles },
+  { name: "Most experienced", fn: (a, b) => b.years - a.years },
+];
+
+const isFree = (h: Helper, day: string, time: string) => !h.daysOff.includes(day) && !h.busy.includes(time);
+
+function HelperCard({ h, line, onClick }: { h: Helper; line: { text: string; good: boolean }; onClick: () => void }) {
+  return (
+    <button className="card row top" style={{ textAlign: "left" }} onClick={onClick}>
+      <Avatar size={52} who={h.id} />
+      <div className="grow">
+        <div className="row between"><b style={{ fontSize: 16 }}>{h.name}</b><b style={{ fontSize: 14 }}>[$XX]/hr</b></div>
+        <div className="muted small" style={{ marginTop: 2 }}>{h.role} · {h.years} yrs · {h.miles} mi</div>
+        <div className="small" style={{ margin: "3px 0 2px" }}>★ {h.rating} ({h.visits} visits)</div>
+        <div className="small" style={{ marginBottom: 6, color: line.good ? "var(--green)" : "var(--ink-2)", fontWeight: 600 }}>{line.text}</div>
+        <div className="chips" style={{ gap: 5 }}>{h.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
+      </div>
+    </button>
+  );
+}
+
+function FavoriteNote() {
+  const { toast } = useNav();
+  return (
+    <button className="card soft" style={{ textAlign: "center", fontSize: 14, color: "var(--ink-2)" }} onClick={() => toast("Request sent to your favorite helper")}>
+      Your favorite helper isn&apos;t free? Ask for another time
+    </button>
+  );
+}
+
+function SwitchCard({ icon, title, sub, onClick }: { icon: string; title: string; sub: string; onClick: () => void }) {
+  return (
+    <button className="card soft row" style={{ textAlign: "left" }} onClick={onClick}>
+      <span style={{ fontSize: 22 }}>{icon}</span>
+      <div className="grow">
+        <b style={{ fontSize: 15 }}>{title}</b>
+        <div className="muted small">{sub}</div>
+      </div>
+      ›
+    </button>
+  );
+}
+
+/** 05 · Browse: the marketplace — every helper, with search, filters and sort. */
 export function Helpers() {
-  const { go, booking, setBooking, toast } = useNav();
-  const [filters, toggle] = useMulti(["Hindi"]);
+  const { go, booking, setBooking } = useNav();
+  const [q, setQ] = useState("");
+  const [filters, toggle] = useMulti([]);
+  const [sort, setSort] = useState(0);
+
+  const query = q.trim().toLowerCase();
+  const list = HELPERS
+    .filter((h) => !query || [h.name, h.role, ...h.langs].some((x) => x.toLowerCase().includes(query)))
+    .filter((h) => filters.every((f) => FILTER_FN[f as Filter](h)))
+    .sort(SORTS[sort].fn);
+
   return (
     <div className="screen">
-      <TopBar title="Choose a helper" sub={`${booking.day} · ${booking.time} · ${booking.hours} hrs`} />
+      <TopBar title={`${booking.service} helpers`} sub="Near Mom · Jackson Heights" />
       <div className="body">
+        <label className="search">
+          <span>⌕</span>
+          <input placeholder="Name, language or skill" value={q} onChange={(e) => setQ(e.target.value)} />
+        </label>
         <div className="chips scroll">
-          {["Hindi", "Rating 4.5+", "Gender", "Price", "Experience"].map((f) => (
+          {FILTERS.map((f) => (
             <Chip key={f} on={filters.includes(f)} onClick={() => toggle(f)}>{f}</Chip>
           ))}
         </div>
         <div className="row between small">
-          <span className="muted">12 helpers available</span>
-          <button style={{ fontWeight: 600 }} onClick={() => toast("Sorted by best match")}>Sort: Best match ▾</button>
+          <span className="muted">{list.length} {list.length === 1 ? "helper" : "helpers"} near Mom</span>
+          <button style={{ fontWeight: 600 }} onClick={() => setSort((sort + 1) % SORTS.length)}>Sort: {SORTS[sort].name} ▾</button>
         </div>
-        {HELPERS.map((h, i) => (
-          <button key={h.id} className={`card row top ${i === 0 ? "sel" : ""}`} style={{ textAlign: "left" }} onClick={() => { setBooking({ helperId: h.id }); go("helper"); }}>
-            <Avatar size={52} who={h.id} />
-            <div className="grow">
-              <div className="row between"><b style={{ fontSize: 16 }}>{h.name}</b><b style={{ fontSize: 14 }}>[$XX]/hr</b></div>
-              <div className="muted small" style={{ marginTop: 2 }}>{h.role} · {h.years} yrs</div>
-              <div className="small" style={{ margin: "3px 0 6px" }}>★ {h.rating} ({h.visits} visits)</div>
-              <div className="chips" style={{ gap: 5 }}>{h.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
-            </div>
-          </button>
+        {list.map((h) => (
+          <HelperCard
+            key={h.id} h={h} line={{ text: `Next free: ${h.next}`, good: h.today }}
+            onClick={() => { setBooking({ helperId: h.id, scheduled: false }); go("helper"); }}
+          />
         ))}
-        <button className="card soft" style={{ textAlign: "center", fontSize: 14, color: "var(--ink-2)" }} onClick={() => toast("Request sent to your favorite helper")}>
-          Your favorite helper isn&apos;t free? Ask for another time
-        </button>
+        {list.length === 0 && (
+          <div className="card" style={{ borderStyle: "dashed", textAlign: "center", color: "var(--ink-2)", fontSize: 14 }}>
+            No helpers match. Try fewer filters.
+          </div>
+        )}
+        <SwitchCard icon="◷" title="Need someone at a set time?" sub="Search by time and see who's free" onClick={() => go("available")} />
+        <FavoriteNote />
+      </div>
+    </div>
+  );
+}
+
+/** 06 · Search by time: say when, see only the helpers free then (or get matched). */
+export function Available() {
+  const { go, booking, setBooking, toast } = useNav();
+  const [day, setDay] = useState(booking.day);
+  const [time, setTime] = useState(booking.time);
+  const list = HELPERS.filter((h) => isFree(h, day, time)).sort(SORTS[0].fn);
+
+  const open = (h: Helper) => { setBooking({ helperId: h.id, day, time, scheduled: true }); go("helper"); };
+  const matchMe = () => {
+    const best = list[0];
+    if (!best) return toast("No one is free then. Try another time");
+    toast(`${best.short} is your best match`);
+    open(best);
+  };
+
+  return (
+    <div className="screen">
+      <TopBar title="Search by time" sub={booking.service} />
+      <div className="body">
+        <div className="label" style={{ margin: 0 }}>When does Mom need help?</div>
+        <div className="grid g5">
+          {DAYS.map(([d, n]) => {
+            const v = `${d} ${n}`;
+            return <button key={v} className={`opt ${day === v ? "on" : ""}`} onClick={() => setDay(v)}>{d}<br />{n}</button>;
+          })}
+        </div>
+        <div className="grid g3">
+          {TIMES.map((t) => (
+            <button key={t} className={`opt ${time === t ? "on" : ""}`} onClick={() => setTime(t)}>{t}</button>
+          ))}
+        </div>
+        <div className="row between small">
+          <span className="muted">{list.length} free {day} · {time}</span>
+          {list.length > 0 && <button style={{ fontWeight: 600 }} onClick={matchMe}>✦ Match me</button>}
+        </div>
+        {list.map((h) => (
+          <HelperCard key={h.id} h={h} line={{ text: `Free at ${time}`, good: true }} onClick={() => open(h)} />
+        ))}
+        {list.length === 0 && (
+          <div className="card" style={{ borderStyle: "dashed", textAlign: "center", color: "var(--ink-2)", fontSize: 14 }}>
+            No one is free at this time. Try another slot.
+          </div>
+        )}
+        <SwitchCard icon="⌕" title="Just looking?" sub="Browse all helpers with filters" onClick={() => go("helpers")} />
+        <FavoriteNote />
       </div>
     </div>
   );
@@ -204,7 +344,8 @@ export function HelperProfile() {
         <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <h2 className="h-lg">{h.name}</h2>
-            <div className="muted" style={{ fontSize: 14 }}>{h.role} · {h.years} yrs · 4 mi away</div>
+            <div className="muted" style={{ fontSize: 14 }}>{h.role} · {h.years} yrs · {h.miles} mi away</div>
+            <div className="small" style={{ marginTop: 4, color: h.today ? "var(--green)" : "var(--ink-2)", fontWeight: 600 }}>Next free: {h.next}</div>
           </div>
           <div className="grid g3">
             <div className="stat"><b>★ {h.rating}</b><span>Rating</span></div>
@@ -212,7 +353,7 @@ export function HelperProfile() {
             <div className="stat"><b>98%</b><span>On time</span></div>
           </div>
           <div className="chips" style={{ gap: 6 }}>
-            {["Background checked", "CPR certified", "Insured", "Hindi, English"].map((t) => <span key={t} className="chip" style={{ fontSize: 13, padding: "6px 12px" }}>{t}</span>)}
+            {["Background checked", ...(h.cpr ? ["CPR certified"] : []), "Insured", h.langs.join(", ")].map((t) => <span key={t} className="chip" style={{ fontSize: 13, padding: "6px 12px" }}>{t}</span>)}
           </div>
           <div className="label">About</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -232,10 +373,12 @@ export function HelperProfile() {
       </div>
       <div className="footer row">
         <div>
-          <div className="small muted">{booking.hours} hrs</div>
-          <b style={{ fontSize: 18 }}>[$XX]</b>
+          <div className="small muted">{booking.scheduled ? `${booking.day} · ${booking.hours} hrs` : "Rate"}</div>
+          <b style={{ fontSize: 18 }}>{booking.scheduled ? "[$XX]" : "[$XX]/hr"}</b>
         </div>
-        <Btn style={{ flex: 1 }} onClick={() => go("checklist")}>Book {h.short}</Btn>
+        {booking.scheduled
+          ? <Btn style={{ flex: 1 }} onClick={() => go("checklist")}>Book {h.short}</Btn>
+          : <Btn style={{ flex: 1 }} onClick={() => go("booking")}>See {h.short}&apos;s times</Btn>}
       </div>
     </div>
   );

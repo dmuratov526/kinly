@@ -59,7 +59,7 @@ export function HelperCancelled() {
       </div>
       <div className="footer">
         <Btn onClick={() => { setBooking({ helperId: "priya", booked: true }); toast("Priya is confirmed"); reset("home"); }}>Accept Priya</Btn>
-        <Btn kind="secondary" onClick={() => go("helpers")}>Choose someone else</Btn>
+        <Btn kind="secondary" onClick={() => go("available")}>Choose someone else</Btn>
         <button className="link" style={{ alignSelf: "center" }} onClick={() => go("booking")}>Pick a new time instead</button>
       </div>
     </div>
