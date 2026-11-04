@@ -112,6 +112,7 @@ input, textarea { font: inherit; color: inherit; }
 .btn.white-red { background: #fff; color: var(--red); }
 .btn.red-outline { border: 2px solid #fff; color: #fff; }
 .btn:disabled { opacity: .35; }
+.btn.demo { height: 40px; font-size: 13px; font-weight: 500; background: transparent; color: var(--ink-2); border: 1.5px dashed var(--ink-2); border-radius: 999px; }
 
 /* ---------- inputs ---------- */
 .input, .textarea {

@@ -73,9 +73,9 @@ export function Tracking() {
           <div className="pin" style={{ marginTop: 6 }}>4821</div>
         </button>
       </div>
-      <div className="footer row">
-        <Btn kind="secondary" style={{ width: 100 }} onClick={() => go("reschedule")}>Cancel</Btn>
-        <Btn style={{ flex: 1 }} onClick={() => go("inProgress")}>{h.short} checked in →</Btn>
+      <div className="footer">
+        <Btn kind="demo" onClick={() => go("inProgress")}>▶ Demo: simulate {h.short} entering the PIN</Btn>
+        <Btn kind="secondary" onClick={() => go("reschedule")}>Cancel visit</Btn>
       </div>
     </div>
   );
@@ -187,7 +187,7 @@ export function InProgress() {
         </div>
       </div>
       <div className="footer">
-        <Btn onClick={() => go("report")}>{h.short} checked out →</Btn>
+        <Btn kind="demo" onClick={() => go("report")}>▶ Demo: simulate {h.short} checking out</Btn>
       </div>
     </div>
   );
