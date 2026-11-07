@@ -1,0 +1,178 @@
+"use client";
+
+import { AnimatePresence, motion, useMotionValue, useTransform, animate, type PanInfo } from "motion/react";
+import { BadgeCheck, ChevronLeft, ChevronsRight, Star, Check } from "lucide-react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useStore } from "./store";
+
+export const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
+export const softSpring = { type: "spring", stiffness: 260, damping: 30 } as const;
+
+/* ---------- people ---------- */
+
+export function Avatar({ src, size = 44, ring, online, style }: { src: string; size?: number; ring?: string; online?: boolean; style?: CSSProperties }) {
+  return (
+    <span className="avatar" style={{ width: size, height: size, ...(ring ? { boxShadow: `0 0 0 2.5px var(--surface), 0 0 0 4.5px ${ring}` } : null), ...style }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" draggable={false} />
+      {online && <span className="online" />}
+    </span>
+  );
+}
+
+export function Verified({ size = 16 }: { size?: number }) {
+  return <BadgeCheck size={size} className="verified" fill="currentColor" stroke="var(--surface)" strokeWidth={2.2} aria-label="Verified" />;
+}
+
+export function Rating({ value, count, size = 13 }: { value: number; count?: number; size?: number }) {
+  return (
+    <span className="rating" style={{ fontSize: size }}>
+      <Star size={size} fill="currentColor" strokeWidth={0} />
+      <b>{value.toFixed(value % 1 === 0 ? 1 : 2).replace(/0$/, "")}</b>
+      {count != null && <span className="muted">({count})</span>}
+    </span>
+  );
+}
+
+/* ---------- layout ---------- */
+
+export function TopBar({ title, sub, right, transparent }: { title?: string; sub?: string; right?: ReactNode; transparent?: boolean }) {
+  const { back } = useStore();
+  return (
+    <div className={`topbar ${transparent ? "clear" : ""}`}>
+      <Tap className="icon-btn" onClick={back} aria-label="Back"><ChevronLeft size={22} /></Tap>
+      <div className="topbar-title">
+        {title && <b>{title}</b>}
+        {sub && <span>{sub}</span>}
+      </div>
+      <div className="topbar-right">{right}</div>
+    </div>
+  );
+}
+
+export function Section({ title, action, onAction, children, style }: { title: string; action?: string; onAction?: () => void; children: ReactNode; style?: CSSProperties }) {
+  return (
+    <section className="section" style={style}>
+      <div className="section-head">
+        <h3>{title}</h3>
+        {action && <button onClick={onAction}>{action}</button>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+type TapProps = React.ComponentProps<typeof motion.button>;
+/** Button with a springy press. */
+export function Tap({ children, ...p }: TapProps) {
+  return (
+    <motion.button whileTap={{ scale: 0.96 }} transition={spring} {...p}>
+      {children}
+    </motion.button>
+  );
+}
+
+export function Btn({ kind = "primary", children, className = "", ...p }: TapProps & { kind?: "primary" | "brand" | "ghost" | "soft" | "danger" | "light" }) {
+  return (
+    <Tap className={`btn ${kind} ${className}`} {...p}>
+      {children}
+    </Tap>
+  );
+}
+
+/* ---------- sheet ---------- */
+
+export function Sheet({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: ReactNode; title?: string }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="sheet-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+          <motion.div
+            className="sheet"
+            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={softSpring}
+            drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={(_, i: PanInfo) => { if (i.offset.y > 90 || i.velocity.y > 500) onClose(); }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grabber" />
+            {title && <h3 className="sheet-title">{title}</h3>}
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ---------- slide to confirm ---------- */
+
+export function SlideToConfirm({ label, onDone, disabled }: { label: string; onDone: () => void; disabled?: boolean }) {
+  const track = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const [done, setDone] = useState(false);
+  const KNOB = 56;
+  const max = () => (track.current ? track.current.offsetWidth - KNOB - 8 : 260);
+  const fill = useTransform(x, (v) => v + KNOB + 4);
+  const textOpacity = useTransform(x, [0, 120], [1, 0]);
+
+  return (
+    <div className={`slide ${disabled ? "off" : ""} ${done ? "done" : ""}`} ref={track}>
+      <motion.div className="slide-fill" style={{ width: fill }} />
+      <motion.span className="slide-label" style={{ opacity: textOpacity }}>
+        <span className="shimmer">{label}</span>
+      </motion.span>
+      <motion.div
+        className="slide-knob"
+        drag={disabled || done ? false : "x"}
+        dragConstraints={track}
+        dragElastic={0}
+        dragMomentum={false}
+        style={{ x }}
+        onDragEnd={() => {
+          if (x.get() > max() * 0.82) {
+            animate(x, max(), { ...spring });
+            setDone(true);
+            setTimeout(onDone, 380);
+          } else animate(x, 0, spring);
+        }}
+        onTap={() => {
+          if (disabled || done) return;
+          // tapping nudges the knob so people learn the gesture
+          animate(x, [0, 42, 0], { duration: 0.6 });
+        }}
+      >
+        {done ? <Check size={24} strokeWidth={3} /> : <ChevronsRight size={24} />}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ---------- stagger helpers ---------- */
+
+export const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
+};
+export const rise = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: softSpring },
+};
+
+export function Stagger({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
+  return (
+    <motion.div className={className} style={style} variants={stagger} initial="hidden" animate="show">
+      {children}
+    </motion.div>
+  );
+}
+export function Rise({ children, className, style, onClick }: { children: ReactNode; className?: string; style?: CSSProperties; onClick?: () => void }) {
+  return (
+    <motion.div className={className} style={style} variants={rise} onClick={onClick}>
+      {children}
+    </motion.div>
+  );
+}
+
+export function Money({ v, cents }: { v: number; cents?: boolean }) {
+  return <>${cents ? v.toFixed(2) : Math.round(v).toLocaleString("en-US")}</>;
+}

@@ -1,25 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const sans = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap", variable: "--font-sans" });
+const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], display: "swap", variable: "--font-serif" });
 
 export const metadata: Metadata = {
-  title: "Kinly — prototype",
-  description: "Clickable mobile prototype of the Kinly wireframes",
+  title: "Kinly · Care for Mom, from anywhere",
+  description: "Clickable prototype: book vetted helpers for your parents, watch the visit live, get a report.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#ffffff",
+  viewportFit: "cover",
+  themeColor: "#F7F3EE",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
