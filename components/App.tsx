@@ -136,6 +136,7 @@ export default function App() {
     draft, setDraft: (p) => setDraftState((d) => ({ ...d, ...p })),
     explore, setExplore: (p) => setExploreState((e) => ({ ...e, ...p })),
     visits, addVisit: (v) => setVisits((vs) => [...vs.filter((x) => x.status !== "upcoming" || x.id !== v.id), v].sort((a, b) => (a.status === "live" ? -1 : b.status === "live" ? 1 : 0))),
+    cancelVisit: (id) => setVisits((vs) => vs.filter((v) => v.id !== id)),
     cart,
     addToCart: (c) => setCart((cs) => [...cs.filter((x) => x.id !== c.id), c]),
     removeFromCart: (id) => setCart((cs) => cs.filter((x) => x.id !== id)),

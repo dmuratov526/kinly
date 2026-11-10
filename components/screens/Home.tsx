@@ -57,7 +57,6 @@ export function Home() {
           <Tap className="care-pill" onClick={() => setCareSheet(true)}>
             <Avatar src={PEOPLE.mom.photo} size={30} />
             <span>Caring for <b>Mom</b></span>
-            <span className="muted">· Jackson Heights</span>
             <ChevronDown size={16} />
           </Tap>
         </Rise>

@@ -49,6 +49,7 @@ export type Store = {
 
   visits: Visit[];
   addVisit: (v: Visit) => void;
+  cancelVisit: (id: string) => void;
 
   cart: CartItem[];
   addToCart: (c: CartItem) => void;

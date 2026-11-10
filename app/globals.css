@@ -600,6 +600,12 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .weekly { display: inline-flex; align-items: center; gap: 3px; height: 20px; padding: 0 7px; border-radius: 6px; background: var(--green-bg); color: var(--green); font-size: 10.5px; font-weight: 800; }
 .visit-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-2); }
 .visit-actions span { flex: 1; text-align: center; height: 36px; display: grid; place-items: center; border-radius: 12px; background: var(--bg); font-size: 13px; font-weight: 700; }
+.visit-actions span.danger { color: var(--red); background: #FDECEC; }
+.btn.danger { background: var(--red); color: #fff; box-shadow: 0 10px 24px -10px rgba(229, 56, 59, .6); }
+.cancel-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 20px; background: var(--bg); }
+.cancel-card b { display: block; font-size: 15px; }
+.cancel-card span { font-size: 13px; color: var(--ink-2); }
+.cancel-note { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
 .visit-summary { margin: 12px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--bg); font-size: 13.5px; line-height: 1.45; color: var(--ink-2); font-style: italic; }
 .stars-row { display: inline-flex; gap: 2px; color: #F5A524; }
 .past-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }

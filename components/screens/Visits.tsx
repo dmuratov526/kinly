@@ -5,12 +5,20 @@ import { ChevronRight, FileText, Repeat, RotateCcw, Star } from "lucide-react";
 import { useState } from "react";
 import { DAYS, endTime, helper, svc, type Visit } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Tap, softSpring } from "../kit";
+import { Avatar, Btn, Sheet, Tap, softSpring } from "../kit";
 import { useStore } from "../store";
 
 export function Visits() {
-  const { visits, go, live, setDraft, toast } = useStore();
+  const { visits, go, live, setDraft, toast, cancelVisit } = useStore();
   const [tab, setTab] = useState<"up" | "past">("up");
+  const [cancelling, setCancelling] = useState<Visit | null>(null);
+  const cancel = (all: boolean) => {
+    if (!cancelling) return;
+    const h = helper(cancelling.helperId);
+    cancelVisit(cancelling.id);
+    setCancelling(null);
+    toast(all ? `Weekly visits with ${h.first} cancelled` : `Cancelled · ${h.first} and Mom are notified`, "check");
+  };
 
   const liveVisit = visits.find((v) => v.status === "live");
   const order = (v: Visit) => { const i = DAYS.findIndex((d) => d.key === v.dayKey); return i < 0 ? 99 : i; };
@@ -54,17 +62,21 @@ export function Visits() {
               )}
 
               <div className="group-label">Next 7 days</div>
+              <AnimatePresence initial={false}>
               {upcoming.map((v, i) => (
-                <motion.div key={v.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                <motion.div key={v.id} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.06 } }} exit={{ opacity: 0, x: -80, height: 0, marginTop: -14 }}>
                   <Tap className="visit" onClick={() => { setDraft({ helperId: v.helperId, service: v.service }); go("helper"); }}>
                     <VisitBody v={v} />
                     <div className="visit-actions">
                       <span onClick={(e) => { e.stopPropagation(); toast("Reschedule options", "info"); }}>Reschedule</span>
                       <span onClick={(e) => { e.stopPropagation(); toast(`Message sent to ${helper(v.helperId).first}`, "check"); }}>Message</span>
+                      <span className="danger" onClick={(e) => { e.stopPropagation(); setCancelling(v); }}>Cancel</span>
                     </div>
                   </Tap>
                 </motion.div>
               ))}
+              </AnimatePresence>
+              {upcoming.length === 0 && <p className="hint" style={{ textAlign: "center" }}>Nothing booked yet.</p>}
             </motion.div>
           ) : (
             <motion.div key="past" className="stack-14" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
@@ -96,6 +108,30 @@ export function Visits() {
         </AnimatePresence>
         <div style={{ height: 120 }} />
       </div>
+
+      <Sheet open={!!cancelling} onClose={() => setCancelling(null)} title="Cancel this visit?">
+        {cancelling && (
+          <div className="stack-14">
+            <div className="cancel-card">
+              <Avatar src={helper(cancelling.helperId).photo} size={46} />
+              <div className="grow">
+                <b>{svc(cancelling.service).name} with {helper(cancelling.helperId).first}</b>
+                <span>{cancelling.dateLabel} · {cancelling.time.replace(":00", "")}</span>
+              </div>
+            </div>
+            <p className="cancel-note">Free cancellation: it&apos;s more than 24 hours away, so you won&apos;t be charged. We&apos;ll let {helper(cancelling.helperId).first} and Mom know.</p>
+            {cancelling.weekly ? (
+              <>
+                <Btn kind="danger" style={{ width: "100%" }} onClick={() => cancel(false)}>Cancel just this visit</Btn>
+                <Btn kind="soft" style={{ width: "100%" }} onClick={() => cancel(true)}>Cancel every week</Btn>
+              </>
+            ) : (
+              <Btn kind="danger" style={{ width: "100%" }} onClick={() => cancel(false)}>Cancel visit</Btn>
+            )}
+            <Btn kind="ghost" style={{ width: "100%" }} onClick={() => setCancelling(null)}>Keep it</Btn>
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 }
