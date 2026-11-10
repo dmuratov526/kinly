@@ -5,7 +5,7 @@ import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart } from "lucide-rea
 import { useState } from "react";
 import { DAYS, FEE, TIMES, cartItem, day, endTime, helper, isFree, priceFor, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Rating, ServiceScope, Tap, TopBar, Verified, spring } from "../kit";
+import { Avatar, Btn, Rating, ServiceScope, Sheet, SlideToConfirm, Tap, TopBar, Verified, spring } from "../kit";
 import { useStore } from "../store";
 
 export function Book() {
@@ -13,6 +13,8 @@ export function Book() {
   const h = helper(draft.helperId);
   const s = svc(draft.service);
   const [adding, setAdding] = useState("");
+  /** Book asks once more, so a slip of the thumb never books by accident */
+  const [reviewing, setReviewing] = useState(false);
 
   const dayFree = (k: string) => TIMES.some((t) => isFree(h, k, t));
   const canBook = isFree(h, draft.dayKey, draft.time);
@@ -152,10 +154,26 @@ export function Book() {
         <Tap className="btn soft" disabled={!canBook} onClick={toCart} aria-label="Add to cart">
           <ShoppingCart size={18} /> Add to cart
         </Tap>
-        <Tap className="btn brand" disabled={!canBook} onClick={confirm} style={{ flex: 1 }}>
+        <Tap className="btn brand" disabled={!canBook} onClick={() => setReviewing(true)} style={{ flex: 1 }}>
           {canBook ? `Book · $${yours}` : "Pick an open time"}
         </Tap>
       </div>
+
+      <Sheet open={reviewing} onClose={() => setReviewing(false)} title="Book this visit?">
+        <div className="stack-14">
+          <div className="cancel-card">
+            <Avatar src={h.photo} size={46} />
+            <div className="grow">
+              <b>{s.name} with {h.first}</b>
+              <span>{day(draft.dayKey).label} · {draft.time.replace(":00", "")}–{endTime(draft.time, draft.hours).replace(":00", "")}{draft.weekly ? " · every week" : ""}</span>
+            </div>
+            <b>${yours}</b>
+          </div>
+          <p className="cancel-note">Charged to Visa ·· 4242 after the visit. Free cancellation until 24 hrs before.</p>
+          <SlideToConfirm label={`Slide to book · $${yours}`} onDone={() => { setReviewing(false); confirm(); }} />
+          <Btn kind="soft" style={{ width: "100%" }} onClick={() => { setReviewing(false); toCart(); }}><ShoppingCart size={18} /> Add to cart instead</Btn>
+        </div>
+      </Sheet>
     </div>
   );
 }
