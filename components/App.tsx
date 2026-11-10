@@ -47,6 +47,8 @@ const toVisit = (c: CartItem): Visit => ({
   time: c.time, hours: c.hours, status: "upcoming", weekly: c.weekly, total: c.total,
 });
 const LIGHT_STATUS: ScreenId[] = ["report", "emergency", "helper"];
+/** screens whose content scrolls under the status bar get a frosted backdrop behind it */
+const FROST_STATUS: ScreenId[] = ["home", "explore", "visits", "cart", "mom"];
 
 const DEFAULT_DRAFT: Draft = {
   service: "companion", helperId: "sunita", dayKey: "today", time: "2:00 PM", hours: 3, tasks: svc("companion").tasks, weekly: true,
@@ -216,7 +218,7 @@ export default function App() {
           <div className="device">
             <div className="device-btn b1" /><div className="device-btn b2" /><div className="device-btn b3" /><div className="device-btn b4" />
             <div className="screen-glass">
-              <div className={`statusbar ${LIGHT_STATUS.includes(screen) ? "light" : ""}`}>
+              <div className={`statusbar ${LIGHT_STATUS.includes(screen) ? "light" : ""} ${FROST_STATUS.includes(screen) ? `frost ${screen}` : ""}`}>
                 <span>2:04</span>
                 <span className="sb-icons"><Signal size={15} strokeWidth={2.6} /><Wifi size={15} strokeWidth={2.6} /><BatteryFull size={20} strokeWidth={2} /></span>
               </div>

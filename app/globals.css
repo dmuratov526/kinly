@@ -135,6 +135,8 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
   transition: color .3s;
 }
 .statusbar.light { color: #fff; }
+.statusbar.frost { background: rgba(247, 243, 238, .93); backdrop-filter: blur(18px) saturate(1.6); -webkit-backdrop-filter: blur(18px) saturate(1.6); }
+.statusbar.frost.mom { background: rgba(255, 248, 239, .93); }
 .sb-icons { display: flex; gap: 6px; align-items: center; }
 
 .island {
@@ -410,8 +412,8 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 /* =========================================================
    EXPLORE
    ========================================================= */
-.explore-head { position: sticky; top: calc(var(--safe) * -1); z-index: 5; background: linear-gradient(var(--bg) 85%, rgba(247, 243, 238, 0)); padding: 10px 0 6px; margin-top: 0; }
-.explore-head .display { margin: 4px 0 16px; }
+.explore-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+.explore-head { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 0 0 8px; box-shadow: 0 10px 14px -14px rgba(23, 20, 31, .25); }
 .svc-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 16px 16px 4px; scrollbar-width: none; }
 .svc-tabs::-webkit-scrollbar { display: none; }
 .svc-tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 62px; padding: 0 4px 10px; font-size: 12px; font-weight: 700; color: var(--ink-2); }

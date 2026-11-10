@@ -78,12 +78,12 @@ export function Explore() {
 
   return (
     <div className="screen scroll">
+      <div className="pad explore-title">
+        <h1 className="display">Find <i>the right</i> helper</h1>
+        <CartButton />
+      </div>
       <div className="explore-head">
         <div className="pad">
-          <div className="row between" style={{ alignItems: "flex-start" }}>
-            <h1 className="display">Find <i>the right</i> helper</h1>
-            <CartButton />
-          </div>
           <label className="searchbar input">
             <Search size={20} />
             <input ref={input} placeholder="Name, language, skill…" value={q} onChange={(e) => setQ(e.target.value)} />
