@@ -43,7 +43,7 @@ export function Explore() {
   const query = q.trim().toLowerCase();
   const base = HELPERS
     .filter((h) => !explore.service || h.services.includes(explore.service))
-    .filter((h) => !query || [h.name, h.role, ...h.langs, ...h.services.map((s) => svc(s).name)].some((x) => x.toLowerCase().includes(query)))
+    .filter((h) => !query || [h.name, h.role, ...h.langs, ...h.skills, ...h.services.map((s) => svc(s).name)].some((x) => x.toLowerCase().includes(query)))
     .filter((h) => !explore.when || isFree(h, explore.when.dayKey, explore.when.time));
   const list = base.filter((h) => passes(h, f, explore.service, favs)).sort(SORTS[sort].fn);
   const nActive = activeCount(f);

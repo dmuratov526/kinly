@@ -94,6 +94,11 @@ export function HelperProfile() {
             <p className="about">{h.bio}</p>
           </div>
 
+          <div className="block">
+            <h3>Good at</h3>
+            <div className="chip-wrap">{h.skills.map((k) => <span key={k} className="tag">{k}</span>)}</div>
+          </div>
+
           <div className="facts">
             <div><Languages size={18} /><span>Speaks <b>{h.langs.join(", ")}</b></span></div>
             <Tap className="fact-tap" onClick={showSafe}><ShieldCheck size={18} /><span className="grow"><b>Kinly Safe</b> · background check, ID, CPR, insurance</span><span className="fact-more">What&apos;s this?</span></Tap>

@@ -937,6 +937,13 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .fs-lang.on span { color: rgba(255, 255, 255, .65); }
 .fs-lang.on em { background: rgba(255, 255, 255, .18); color: #fff; }
 
+.fs-skill { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 10px 0 13px; border-radius: 999px; box-shadow: 0 0 0 1.5px var(--line) inset; font-size: 13.5px; font-weight: 700; color: var(--ink); transition: background .2s, color .2s, opacity .2s; }
+.fs-skill svg { color: var(--brand-2); }
+.fs-skill em { font-style: normal; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--bg); font-size: 11px; font-weight: 800; display: grid; place-items: center; color: var(--ink-2); }
+.fs-skill.on { background: var(--ink); color: #fff; box-shadow: none; }
+.fs-skill.on svg { color: #FF9DBA; }
+.fs-skill.on em { background: rgba(255, 255, 255, .18); color: #fff; }
+.fs-skill.dead { opacity: .4; }
 .fs-seg { display: flex; padding: 4px; border-radius: 16px; background: var(--bg); }
 .fs-seg button { position: relative; flex: 1; height: 40px; border-radius: 12px; font-size: 13.5px; font-weight: 750; color: var(--ink-2); }
 .fs-seg button span:not(.fs-seg-bg) { position: relative; z-index: 1; }

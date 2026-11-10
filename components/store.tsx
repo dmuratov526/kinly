@@ -33,8 +33,9 @@ export type Filters = {
   gender: "any" | "f" | "m";
   medical: boolean;
   saved: boolean;
+  skills: string[];
 };
-export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, car: false, gender: "any", medical: false, saved: false };
+export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, car: false, gender: "any", medical: false, saved: false, skills: [] };
 
 export type Store = {
   screen: ScreenId;

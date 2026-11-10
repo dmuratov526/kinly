@@ -1,9 +1,9 @@
 "use client";
 
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "motion/react";
-import { Bookmark, Car, Clock, RotateCcw, Stethoscope } from "lucide-react";
+import { Bookmark, Brain, Car, ChefHat, Clock, Dumbbell, Footprints, House, NotebookPen, Pill, RotateCcw, Smartphone, Stethoscope, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
-import { HELPERS, cardRate, svc, type Helper, type ServiceId } from "../data";
+import { HELPERS, SKILLS, cardRate, svc, type Helper, type ServiceId } from "../data";
 import { Avatar, Sheet, Tap, spring } from "../kit";
 import { NO_FILTERS, type Filters } from "../store";
 
@@ -18,11 +18,12 @@ export const passes = (h: Helper, f: Filters, service: ServiceId | null, favs: s
   (!f.car || h.badges.includes("Has a car")) &&
   (f.gender === "any" || h.gender === f.gender) &&
   (!f.medical || h.medical) &&
-  (!f.saved || favs.includes(h.id));
+  (!f.saved || favs.includes(h.id)) &&
+  f.skills.every((s) => h.skills.includes(s));
 
 export const activeCount = (f: Filters) =>
   Number(f.today) + f.langs.length + Number(f.minRating != null) + Number(f.maxMiles != null) + Number(f.maxRate != null) +
-  Number(f.car) + Number(f.gender !== "any") + Number(f.medical) + Number(f.saved);
+  Number(f.car) + Number(f.gender !== "any") + Number(f.medical) + Number(f.saved) + f.skills.length;
 
 const NATIVE: Record<string, string> = {
   Hindi: "हिन्दी", Spanish: "Español", Arabic: "العربية", Polish: "Polski", Mandarin: "中文",
@@ -30,6 +31,10 @@ const NATIVE: Record<string, string> = {
 };
 const LANGS = [...new Set(HELPERS.flatMap((h) => h.langs))].filter((l) => l !== "English");
 const MILES = { min: 0.5, max: 3.5 };
+const SKILL_ICON: Record<string, LucideIcon> = {
+  "Dementia care": Brain, "Mobility & walks": Footprints, "Meds reminders": Pill, "Doctor notes": NotebookPen,
+  Cooking: ChefHat, Housekeeping: House, Driving: Car, "Heavy lifting": Dumbbell, "Tech setup": Smartphone,
+};
 
 /* ---------- sheet ---------- */
 
@@ -104,6 +109,23 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
           <Slider min={MILES.min} max={MILES.max} step={0.1} value={f.maxMiles ?? MILES.max}
             onChange={(v) => setF({ maxMiles: v >= MILES.max ? null : Math.round(v * 10) / 10 })} />
           <div className="fs-ends"><span>Next door</span><span>{MILES.max}+ mi</span></div>
+        </Block>
+
+        {/* skills: helper must have every one picked */}
+        <Block title="Skills" value={f.skills.length ? `${f.skills.length} picked` : "Any"}>
+          <div className="chip-wrap">
+            {SKILLS.map((k) => {
+              const on = f.skills.includes(k);
+              const Icon = SKILL_ICON[k];
+              const c = countWith({ skills: on ? f.skills : [...f.skills, k] });
+              return (
+                <Tap key={k} className={`fs-skill ${on ? "on" : ""} ${!on && !c ? "dead" : ""}`}
+                  onClick={() => setF({ skills: on ? f.skills.filter((x) => x !== k) : [...f.skills, k] })}>
+                  <Icon size={16} /> {k} <em>{c}</em>
+                </Tap>
+              );
+            })}
+          </div>
         </Block>
 
         {/* must-haves */}
