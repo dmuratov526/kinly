@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart, Users } from "lucide-react";
+import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { DAYS, FEE, TIMES, cartItem, day, endTime, helper, isFree, priceFor, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
@@ -13,12 +13,11 @@ export function Book() {
   const h = helper(draft.helperId);
   const s = svc(draft.service);
   const [adding, setAdding] = useState("");
-  const [split, setSplit] = useState(true);
 
   const dayFree = (k: string) => TIMES.some((t) => isFree(h, k, t));
   const canBook = isFree(h, draft.dayKey, draft.time);
   const p = priceFor(h, s, draft.hours);
-  const yours = split ? Math.round(p.total / 2) : p.total;
+  const yours = p.total;
 
   const item = () => cartItem(h.id, s.id, draft.dayKey, draft.time, s.unit === "visit" ? 1 : draft.hours, draft.weekly);
   const toCart = () => {
@@ -137,12 +136,8 @@ export function Book() {
           <div className="receipt">
             <div className="receipt-row"><span>{s.unit === "visit" ? "Wellness visit" : `${draft.hours} hrs × $${rateFor(h, s)}`}</span><span>${p.base}</span></div>
             <div className="receipt-row"><span>Kinly care fee ({FEE * 100}%)</span><span>${p.fee.toFixed(2)}</span></div>
-            <Tap className="receipt-row split" onClick={() => setSplit(!split)}>
-              <span className="row" style={{ gap: 8 }}><Users size={16} /> Split with Anita</span>
-              <span className={`switch sm ${split ? "on" : ""}`}><motion.i layout transition={spring} /></span>
-            </Tap>
             <div className="receipt-total">
-              <span>You pay {split && <em>(half)</em>}</span>
+              <span>Total</span>
               <motion.b key={yours} initial={{ scale: 1.15 }} animate={{ scale: 1 }}>${yours}</motion.b>
             </div>
             <div className="pay-method"><CreditCard size={16} /> Visa ·· 4242 · charged after the visit · free cancellation until 24 hrs before</div>

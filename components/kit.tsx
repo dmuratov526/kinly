@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useMotionValue, useTransform, animate, type PanInfo } from "motion/react";
 import { BadgeCheck, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useStore } from "./store";
 
 export const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
@@ -82,8 +83,12 @@ export function Btn({ kind = "primary", children, className = "", ...p }: TapPro
 
 /* ---------- sheet ---------- */
 
+/** Rendered into the phone screen itself, so it covers everything even when the page underneath is scrolled. */
 export function Sheet({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: ReactNode; title?: string }) {
-  return (
+  const [host, setHost] = useState<Element | null>(null);
+  useEffect(() => setHost(document.querySelector(".screen-glass")), []);
+  if (!host) return null;
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div className="sheet-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
@@ -100,7 +105,8 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    host,
   );
 }
 

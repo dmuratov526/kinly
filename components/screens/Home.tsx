@@ -226,7 +226,7 @@ export function Home() {
         <div className="stack-10">
           <Tap className="care-opt on" onClick={() => setCareSheet(false)}>
             <Avatar src={PEOPLE.mom.photo} size={48} />
-            <div className="grow" style={{ textAlign: "left" }}><b>Mom · Kamala, 78</b><span>Jackson Heights, Queens</span></div>
+            <div className="grow" style={{ textAlign: "left" }}><b>Mom</b></div>
             <span className="radio on" />
           </Tap>
         </div>

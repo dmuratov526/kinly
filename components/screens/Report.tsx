@@ -87,8 +87,7 @@ export function Report() {
           <div className="receipt">
             <div className="receipt-row"><span>3 hrs × $20</span><span>$60</span></div>
             <div className="receipt-row"><span>Kinly care fee (5%)</span><span>$3.00</span></div>
-            <div className="receipt-row"><span>Anita&apos;s half</span><span className="ok-text">− $31.50</span></div>
-            <div className="receipt-total"><span>Charged to Visa ·· 4242</span><b>$31.50</b></div>
+            <div className="receipt-total"><span>Charged to Visa ·· 4242</span><b>$63</b></div>
           </div>
 
           {/* rate */}

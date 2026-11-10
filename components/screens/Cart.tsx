@@ -1,23 +1,21 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { CreditCard, Plus, Repeat, Users, X } from "lucide-react";
-import { useState } from "react";
+import { CreditCard, Plus, Repeat, X } from "lucide-react";
 import { FEE, day, endTime, helper, priceFor, svc, type CartItem } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Btn, SlideToConfirm, Tap, spring } from "../kit";
+import { Avatar, Btn, SlideToConfirm, Tap } from "../kit";
 import { useStore } from "../store";
 
 /** Several separate visits (different days, maybe different helpers), booked and paid in one go. */
 export function Cart() {
   const { cart, removeFromCart, checkout, tab, setExplore, toast } = useStore();
-  const [split, setSplit] = useState(true);
 
   const prices = cart.map((c) => priceFor(helper(c.helperId), svc(c.service), c.hours));
   const base = prices.reduce((a, p) => a + p.base, 0);
   const fee = prices.reduce((a, p) => a + p.fee, 0);
   const total = cart.reduce((a, c) => a + c.total, 0);
-  const yours = split ? Math.round(total / 2) : total;
+  const yours = total;
 
   const browse = () => {
     setExplore({ service: null, when: null, focus: false });
@@ -57,12 +55,8 @@ export function Cart() {
             <div className="receipt">
               <div className="receipt-row"><span>{cart.length} visit{cart.length === 1 ? "" : "s"}</span><span>${base}</span></div>
               <div className="receipt-row"><span>Kinly care fee ({FEE * 100}%)</span><span>${fee.toFixed(2)}</span></div>
-              <Tap className="receipt-row split" onClick={() => setSplit(!split)}>
-                <span className="row" style={{ gap: 8 }}><Users size={16} /> Split with Anita</span>
-                <span className={`switch sm ${split ? "on" : ""}`}><motion.i layout transition={spring} /></span>
-              </Tap>
               <div className="receipt-total">
-                <span>You pay {split && <em>(half)</em>}</span>
+                <span>Total</span>
                 <motion.b key={yours} initial={{ scale: 1.15 }} animate={{ scale: 1 }}>${yours}</motion.b>
               </div>
               <div className="pay-method"><CreditCard size={16} /> Visa ·· 4242 · each visit is charged after it happens</div>

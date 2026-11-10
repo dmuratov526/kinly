@@ -85,7 +85,7 @@ export function Confirmed() {
               <div className="ticket-notes">
                 {([
                   [MessageSquareHeart, "Mom gets a text with each helper's photo"],
-                  [Users, "Anita can see every visit and split the cost"],
+                  [Users, "Anita can see every visit too"],
                   [BellRing, "Reminders 24 hrs and 1 hr before each one"],
                 ] as const).map(([Icon, t], i) => (
                   <motion.div key={t} className="row" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9 + i * 0.12 }}>
@@ -117,7 +117,7 @@ export function Confirmed() {
             <div className="ticket-notes">
               {([
                 [MessageSquareHeart, `We texted Mom ${h.first}'s photo and arrival time`],
-                [Users, "Anita can see this visit and split the cost"],
+                [Users, "Anita can see this visit too"],
                 [BellRing, "Reminders 24 hrs and 1 hr before"],
               ] as const).map(([Icon, t], i) => (
                 <motion.div key={t} className="row" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.12 }}>
