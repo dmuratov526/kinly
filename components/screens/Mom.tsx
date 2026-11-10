@@ -40,6 +40,12 @@ export function Mom() {
             <h1 className="mom-hello">Good afternoon,<br /><i>Kamala</i></h1>
           </div>
 
+          {/* one tap, then a calm yes / I'm okay. No press-and-hold, no countdown */}
+          <Tap className="mom-sos" onClick={() => setSos(true)}>
+            <b>I need help</b>
+            <span>Tap once</span>
+          </Tap>
+
           <motion.div className="mom-visit" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="mom-visit-top">
               <Avatar src={h.photo} size={104} ring="#22C55E" />
@@ -105,11 +111,6 @@ export function Mom() {
             ))}
           </div>
 
-          {/* one tap, then a calm yes / I'm okay. No press-and-hold, no countdown */}
-          <Tap className="mom-sos" onClick={() => setSos(true)}>
-            <b>I need help</b>
-            <span>Tap once</span>
-          </Tap>
           <div style={{ height: 40 }} />
         </div>
       </div>
