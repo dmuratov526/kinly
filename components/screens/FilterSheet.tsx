@@ -2,7 +2,7 @@
 
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "motion/react";
 import { Bookmark, Brain, Car, ChefHat, Clock, Dumbbell, Footprints, House, NotebookPen, Pill, RotateCcw, Smartphone, Stethoscope, type LucideIcon } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HELPERS, SKILLS, cardRate, svc, type Helper, type ServiceId } from "../data";
 import { Avatar, Sheet, Tap, spring } from "../kit";
 import { NO_FILTERS, type Filters } from "../store";
@@ -26,10 +26,15 @@ export const activeCount = (f: Filters) =>
   Number(f.car) + Number(f.gender !== "any") + Number(f.medical) + Number(f.saved) + f.skills.length;
 
 const NATIVE: Record<string, string> = {
-  Hindi: "हिन्दी", Spanish: "Español", Arabic: "العربية", Polish: "Polski", Mandarin: "中文",
-  German: "Deutsch", Igbo: "Igbo", Marathi: "मराठी",
+  Hindi: "हिन्दी", Spanish: "Español", Arabic: "العربية", Polish: "Polski", Mandarin: "中文", Cantonese: "粵語",
+  German: "Deutsch", Marathi: "मराठी", Korean: "한국어", Vietnamese: "Tiếng Việt", Portuguese: "Português",
+  French: "Français", Italian: "Italiano", Hebrew: "עברית", Ukrainian: "Українська", Russian: "Русский",
+  Punjabi: "ਪੰਜਾਬੀ", Bengali: "বাংলা", "Haitian Creole": "Kreyòl",
 };
-const LANGS = [...new Set(HELPERS.flatMap((h) => h.langs))].filter((l) => l !== "English");
+/** most spoken first */
+const LANGS = [...new Set(HELPERS.flatMap((h) => h.langs))].filter((l) => l !== "English")
+  .sort((a, b) => HELPERS.filter((h) => h.langs.includes(b)).length - HELPERS.filter((h) => h.langs.includes(a)).length);
+const FACES = 7;
 const MILES = { min: 0.5, max: 3.5 };
 const SKILL_ICON: Record<string, LucideIcon> = {
   "Dementia care": Brain, "Mobility & walks": Footprints, "Meds reminders": Pill, "Doctor notes": NotebookPen,
@@ -50,6 +55,14 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
   const rMin = Math.min(...rates, 15), rMax = Math.max(...rates, 16);
   /** what would match if this one filter were changed, so chips can show live counts */
   const countWith = (p: Partial<Filters>) => base.filter((h) => passes(h, { ...f, ...p }, service, favs)).length;
+  const [allLangs, setAllLangs] = useState(false);
+  const langs = allLangs ? LANGS : LANGS.slice(0, 8);
+  /** bars scale to the busiest bucket so a big roster still fits */
+  const priceBuckets = Array.from({ length: rMax - rMin + 1 }, (_, i) => rMin + i).map((v) => ({ v, c: rates.filter((r) => r === v).length }));
+  const STEP = 0.25;
+  const mileBuckets = Array.from({ length: Math.round((MILES.max - MILES.min) / STEP) + 1 }, (_, i) => MILES.min + i * STEP)
+    .map((v) => ({ v, c: base.filter((h) => Math.abs(Math.min(Math.max(h.miles, MILES.min), MILES.max) - v) < STEP / 2 + 1e-9).length }));
+  const bar = (c: number, max: number) => (c ? 8 + (c / Math.max(1, max)) * 50 : 3);
 
   return (
     <Sheet open={open} onClose={onClose} className="tall">
@@ -67,11 +80,14 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
         <div className="fs-faces">
           <div className="fs-stack">
             <AnimatePresence initial={false} mode="popLayout">
-              {matches.map((h, i) => (
+              {matches.slice(0, FACES).map((h, i) => (
                 <motion.span key={h.id} layout initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={spring} style={{ zIndex: 20 - i }}>
                   <Avatar src={h.photo} size={34} />
                 </motion.span>
               ))}
+              {matches.length > FACES && (
+                <motion.span key="more" layout className="fs-more" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>+{matches.length - FACES}</motion.span>
+              )}
             </AnimatePresence>
           </div>
           <span className="fs-count"><Ticker v={matches.length} /> of {base.length} helpers</span>
@@ -82,10 +98,9 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
         {/* price */}
         <Block title={service ? `Price · ${svc(service).name}` : "Price"} value={f.maxRate == null ? "Any price" : `Up to $${f.maxRate}/${unit}`}>
           <div className="fs-hist">
-            {Array.from({ length: rMax - rMin + 1 }, (_, i) => rMin + i).map((v) => {
-              const c = rates.filter((r) => r === v).length;
+            {priceBuckets.map(({ v, c }) => {
               const on = f.maxRate == null || v <= f.maxRate;
-              return <motion.i key={v} animate={{ height: c ? 10 + c * 14 : 4, opacity: on ? 1 : 0.25 }} className={on ? "on" : ""} transition={spring} />;
+              return <motion.i key={v} animate={{ height: bar(c, Math.max(...priceBuckets.map((b) => b.c))), opacity: on ? 1 : 0.25 }} className={on ? "on" : ""} transition={spring} />;
             })}
           </div>
           <Slider min={rMin} max={rMax} step={1} value={f.maxRate ?? rMax}
@@ -93,17 +108,12 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
           <div className="fs-ends"><span>${rMin}</span><span>${rMax}+</span></div>
         </Block>
 
-        {/* distance, with every helper sitting at their real distance */}
-        <Block title="Distance from Mom" value={f.maxMiles == null ? "Any distance" : `Within ${f.maxMiles.toFixed(1)} mi`}>
-          <div className="fs-dots">
-            {base.map((h) => {
-              const pct = ((Math.min(Math.max(h.miles, MILES.min), MILES.max) - MILES.min) / (MILES.max - MILES.min)) * 100;
-              const on = f.maxMiles == null || h.miles <= f.maxMiles;
-              return (
-                <motion.span key={h.id} className="fs-dot" style={{ left: `${pct}%` }} animate={{ opacity: on ? 1 : 0.3, scale: on ? 1 : 0.8, filter: on ? "grayscale(0)" : "grayscale(1)" }}>
-                  <Avatar src={h.photo} size={26} />
-                </motion.span>
-              );
+        {/* distance: how many helpers live how far from Mom */}
+        <Block title="Distance from Mom" value={f.maxMiles == null ? "Any distance" : `Within ${f.maxMiles.toFixed(1)} mi · ${countWith({})} helpers`}>
+          <div className="fs-hist">
+            {mileBuckets.map(({ v, c }) => {
+              const on = f.maxMiles == null || v <= f.maxMiles + 1e-9;
+              return <motion.i key={v} animate={{ height: bar(c, Math.max(...mileBuckets.map((b) => b.c))), opacity: on ? 1 : 0.25 }} className={on ? "on" : ""} transition={spring} />;
             })}
           </div>
           <Slider min={MILES.min} max={MILES.max} step={0.1} value={f.maxMiles ?? MILES.max}
@@ -153,7 +163,7 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
         {/* languages */}
         <Block title="Speaks" value={f.langs.length ? f.langs.join(", ") : "Any language"}>
           <div className="chip-wrap">
-            {LANGS.map((l) => {
+            {langs.map((l) => {
               const on = f.langs.includes(l);
               return (
                 <Tap key={l} className={`fs-lang ${on ? "on" : ""}`} onClick={() => setF({ langs: on ? f.langs.filter((x) => x !== l) : [...f.langs, l] })}>
@@ -163,6 +173,9 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
                 </Tap>
               );
             })}
+            {LANGS.length > 8 && (
+              <Tap className="fs-lang more" onClick={() => setAllLangs(!allLangs)}>{allLangs ? "Show less" : `+${LANGS.length - 8} more`}</Tap>
+            )}
           </div>
         </Block>
 

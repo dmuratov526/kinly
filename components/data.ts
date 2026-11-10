@@ -112,7 +112,8 @@ export type Helper = {
   repeat: number;
 };
 
-export const HELPERS: Helper[] = [
+/** The nine people the demo story is built around. */
+const CORE: Helper[] = [
   {
     id: "sunita", name: "Sunita Rao", first: "Sunita", photo: "/img/sunita.jpg", role: "Former nurse's aide", years: 12,
     rating: 4.97, reviews: 96, visits: 312, adj: 2, miles: 1.2, langs: ["Hindi", "English", "Marathi"], cpr: true, gender: "f", medical: true, skills: ["Dementia care", "Mobility & walks", "Cooking", "Meds reminders", "Doctor notes"],
@@ -186,6 +187,92 @@ export const HELPERS: Helper[] = [
     badges: ["Has a car", "Clean record"], onTime: 96, repeat: 79,
   },
 ];
+
+/* ---------- the wider roster: lots of different people, built from compact rows ---------- */
+
+type Kind = "cna" | "hha" | "cook" | "driver" | "tech" | "student" | "pt" | "house" | "dementia" | "emt" | "social" | "teacher";
+
+const KINDS: Record<Kind, { role: string; services: ServiceId[]; skills: string[]; medical: boolean; badges: string[]; bio: string }> = {
+  cna: { role: "Certified nursing assistant", services: ["companion", "wellness", "escort"], skills: ["Meds reminders", "Mobility & walks", "Dementia care"], medical: true, badges: ["CNA"], bio: "I've worked in hospitals and in people's homes. Home is better: there's time to sit down, listen and do things properly." },
+  hha: { role: "Home health aide", services: ["home", "wellness", "companion"], skills: ["Housekeeping", "Meds reminders", "Cooking"], medical: true, badges: ["HHA certified"], bio: "I keep the house running and an eye on how she's doing. Clean kitchen, warm lunch, meds on time." },
+  cook: { role: "Companion and home cook", services: ["companion", "errands"], skills: ["Cooking", "Mobility & walks"], medical: false, badges: ["Great cook"], bio: "Most of my visits end up in the kitchen. We cook her recipes together, then go for a slow walk." },
+  driver: { role: "Driver and errand runner", services: ["escort", "errands"], skills: ["Driving", "Heavy lifting"], medical: false, badges: ["Has a car"], bio: "Clean car, door-to-door, no rushing. I wait at the appointment and carry everything up the stairs." },
+  tech: { role: "Tech tutor", services: ["tech", "companion"], skills: ["Tech setup"], medical: false, badges: ["Tech whiz"], bio: "Phones, tablets, video calls, the TV remote. I write simple notes so she can do it herself next time." },
+  student: { role: "Nursing student", services: ["companion", "wellness", "tech"], skills: ["Meds reminders", "Tech setup", "Mobility & walks"], medical: true, badges: ["Nursing student"], bio: "I'm studying to be a nurse and I love time with older folks. Patient, upbeat and always on time." },
+  pt: { role: "Physical therapy aide", services: ["companion", "wellness"], skills: ["Mobility & walks", "Heavy lifting"], medical: true, badges: ["PT aide"], bio: "I help people stay steady on their feet: gentle exercises, safe walks, and a home with fewer trip hazards." },
+  house: { role: "Housekeeper", services: ["home", "errands"], skills: ["Housekeeping", "Cooking"], medical: false, badges: ["Spotless"], bio: "Laundry, sheets, a sparkling bathroom and a stocked fridge. I leave a note of everything I did." },
+  dementia: { role: "Memory care specialist", services: ["companion", "wellness"], skills: ["Dementia care", "Meds reminders"], medical: true, badges: ["Dementia trained"], bio: "I've spent years in memory care. Routine, music and patience go a long way on the hard days." },
+  emt: { role: "Former EMT", services: ["escort", "wellness"], skills: ["Driving", "Doctor notes", "Heavy lifting"], medical: true, badges: ["Ex-EMT", "Has a car"], bio: "Ten years on an ambulance taught me to stay calm. I take notes at every appointment so nothing gets missed." },
+  social: { role: "Social work student", services: ["companion", "escort"], skills: ["Doctor notes", "Mobility & walks"], medical: false, badges: ["Great listener"], bio: "I'm studying social work at Hunter. I help with appointments, paperwork, and just being good company." },
+  teacher: { role: "Retired teacher", services: ["companion", "tech"], skills: ["Tech setup", "Mobility & walks"], medical: false, badges: ["Very patient"], bio: "After 30 years in the classroom, nothing is a silly question. Crosswords, card games and video calls are my specialty." },
+};
+
+/* id, name, gender, languages besides English, kind, years, miles from Mom */
+const ROSTER: [string, string, "f" | "m", string[], Kind, number, number][] = [
+  ["katie", "Katie Sullivan", "f", [], "cna", 7, 1.4],
+  ["jenny", "Jenny Park", "f", ["Korean"], "student", 2, 0.9],
+  ["keisha", "Keisha Brown", "f", [], "hha", 11, 1.7],
+  ["ana", "Ana Ferreira", "f", ["Portuguese", "Spanish"], "house", 6, 2.1],
+  ["valeria", "Valeria Ruiz", "f", ["Spanish"], "cook", 5, 0.7],
+  ["amara", "Amara Diallo", "f", ["French", "Wolof"], "cna", 9, 2.6],
+  ["sofia", "Sofia Russo", "f", ["Italian"], "pt", 4, 3.0],
+  ["barbara", "Barbara Miller", "f", [], "teacher", 3, 1.1],
+  ["emily", "Emily Carter", "f", [], "student", 1, 2.3],
+  ["rosa", "Rosa Martinez", "f", ["Spanish"], "hha", 14, 0.6],
+  ["rachel", "Rachel Goldberg", "f", ["Hebrew"], "dementia", 12, 3.2],
+  ["layla", "Layla Hassan", "f", ["Arabic"], "cna", 6, 1.9],
+  ["linh", "Linh Nguyen", "f", ["Vietnamese"], "cook", 4, 2.8],
+  ["sophie", "Sophie Chen", "f", ["Cantonese", "Mandarin"], "tech", 3, 1.5],
+  ["olena", "Olena Petrenko", "f", ["Ukrainian", "Russian"], "house", 8, 2.4],
+  ["maureen", "Maureen O'Brien", "f", [], "dementia", 25, 3.4],
+  ["carol", "Carol Jensen", "f", [], "teacher", 5, 2.0],
+  ["kevin", "Kevin Tran", "m", ["Vietnamese"], "tech", 2, 1.2],
+  ["vikram", "Vikram Singh", "m", ["Punjabi", "Hindi"], "driver", 7, 0.8],
+  ["diego", "Diego Morales", "m", ["Spanish"], "driver", 4, 1.6],
+  ["kwame", "Kwame Mensah", "m", ["Twi"], "pt", 3, 2.7],
+  ["mike", "Mike Russo", "m", ["Italian"], "emt", 10, 3.1],
+  ["daniel", "Daniel Kim", "m", ["Korean"], "social", 2, 1.8],
+  ["andre", "Andre Thompson", "m", [], "cna", 8, 1.3],
+  ["jake", "Jake Murphy", "m", [], "house", 3, 2.5],
+  ["paul", "Paul Lévesque", "m", ["French"], "teacher", 4, 3.3],
+  ["farhan", "Farhan Rahman", "m", ["Bengali"], "driver", 5, 1.0],
+  ["luis", "Luis Herrera", "m", ["Spanish"], "emt", 9, 2.2],
+  ["jp", "Jean-Pierre Joseph", "m", ["Haitian Creole", "French"], "hha", 12, 2.9],
+  ["darnell", "Darnell Harris", "m", [], "social", 1, 1.9],
+  ["samuel", "Samuel Adeyemi", "m", ["Yoruba"], "student", 2, 3.5],
+];
+
+/** small deterministic "random" so every load shows the same people */
+const rnd = (seed: string, n: number) => {
+  let x = 0;
+  for (const c of seed) x = (x * 31 + c.charCodeAt(0)) >>> 0;
+  x = (x ^ (x >>> 13)) * 1274126177 >>> 0;
+  return x % n;
+};
+const DAY_KEYS = ["today", "fri", "sat", "sun", "mon", "tue", "wed"];
+const SLOT = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
+
+const EXTRA: Helper[] = ROSTER.map(([id, name, gender, langs, kind, years, miles]) => {
+  const k = KINDS[kind];
+  const first = name.split(" ")[0];
+  const off = [DAY_KEYS[rnd(id + "a", 7)], ...(rnd(id + "b", 3) === 0 ? [DAY_KEYS[rnd(id + "c", 7)]] : [])];
+  const busy = [SLOT[rnd(id + "d", 8)]];
+  const today = !off.includes("today");
+  const free = SLOT.find((t) => !busy.includes(t) && t !== "9:00 AM") ?? "1:00 PM";
+  const rating = Math.round((4.6 + rnd(id + "r", 39) / 100) * 100) / 100;
+  const reviews = 6 + rnd(id + "v", 110);
+  return {
+    id, name, first, photo: `/img/h/${id}.jpg`, role: k.role, years,
+    rating, reviews, visits: reviews * 3 + rnd(id + "x", 40), adj: rnd(id + "j", 4), miles,
+    langs: ["English", ...langs], cpr: true, gender, medical: k.medical, skills: k.skills, services: k.services,
+    next: today ? `Today · ${free.replace(":00", "")}` : `Tomorrow · ${free.replace(":00", "")}`, today,
+    match: 55 + rnd(id + "m", 30), daysOff: off, busy,
+    bio: k.bio, badges: [...(rating >= 4.95 ? ["Top Helper"] : []), ...k.badges, ...(langs[0] ? [`${langs[0]} speaker`] : [])].slice(0, 3),
+    onTime: 92 + rnd(id + "o", 8), repeat: 70 + rnd(id + "p", 25),
+  };
+});
+
+export const HELPERS: Helper[] = [...CORE, ...EXTRA];
 export const helper = (id: string) => HELPERS.find((h) => h.id === id) ?? HELPERS[0];
 
 export const REVIEWS = [

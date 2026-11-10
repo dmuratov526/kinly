@@ -128,7 +128,7 @@ export function Explore() {
         <motion.div layout className="stack-14">
           <AnimatePresence mode="popLayout">
             {list.map((h, i) => (
-              <motion.div key={h.id} layout initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ ...softSpring, delay: i * 0.04 }}>
+              <motion.div key={h.id} layout initial={{ opacity: 0, y: 18, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ ...softSpring, delay: Math.min(i, 6) * 0.04 }}>
                 <HelperCard h={h} service={explore.service} fav={favs.includes(h.id)} onFav={() => toggleFav(h.id)} onOpen={() => open(h)} when={explore.when} />
               </motion.div>
             ))}
