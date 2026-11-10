@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ChevronLeft, KeyRound, MessageCircle, Phone, Play, Send, Siren, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, HeartPulse, KeyRound, MessageCircle, Phone, Play, Send, Siren, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { helper } from "../data";
 import { StreetMap, useDrive } from "../map";
-import { Avatar, Btn, Rating, SosCountdown, Tap, spring } from "../kit";
+import { Avatar, Btn, Rating, Sheet, Tap, spring } from "../kit";
 import { useStore, type LiveStage } from "../store";
 
 const STAGES = ["On the way", "Arrived", "With Mom", "Done"];
@@ -88,7 +88,25 @@ export function Live() {
         )}
       </motion.div>
 
-      <SosCountdown open={sos} onCancel={() => setSos(false)} onDone={fire} sub="We'll call 911 to Mom's address, alert Sunita and Anita, and connect a Kinly nurse." />
+      <Sheet open={sos} onClose={() => setSos(false)} title="What's happening with Mom?">
+        <div className="stack-10">
+          <Tap className="sos-opt red" onClick={fire}>
+            <span className="sos-opt-ic"><Siren size={22} /></span>
+            <div className="grow"><b>Call 911 to Mom&apos;s home</b><span>37-12 82nd St · Sunita and Anita are alerted</span></div>
+            <ChevronRight size={18} />
+          </Tap>
+          <Tap className="sos-opt" onClick={() => { setSos(false); toast(`Calling ${h.first}…`, "info"); }}>
+            <span className="sos-opt-ic green"><Phone size={20} /></span>
+            <div className="grow"><b>Call {h.first}</b><span>{live >= 1 && live <= 2 ? "She's with Mom right now" : `${mins} min from Mom`}</span></div>
+            <ChevronRight size={18} />
+          </Tap>
+          <Tap className="sos-opt" onClick={() => { setSos(false); toast("Connecting to a Kinly nurse…", "info"); }}>
+            <span className="sos-opt-ic plum"><HeartPulse size={20} /></span>
+            <div className="grow"><b>Talk to a Kinly nurse</b><span>Not sure it&apos;s an emergency? Ask first, 24/7</span></div>
+            <ChevronRight size={18} />
+          </Tap>
+        </div>
+      </Sheet>
     </div>
   );
 }

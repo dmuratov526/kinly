@@ -868,22 +868,23 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .attr-high-lg .smap-attr { bottom: 232px; }
 
 /* =========================================================
-   EMERGENCY COUNTDOWN
+   ASKING FOR HELP (calm, no timer)
    ========================================================= */
-.sos-count { position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 30px 28px; text-align: center; color: #fff; background: radial-gradient(120% 80% at 50% 20%, rgba(240, 74, 76, .97), rgba(180, 22, 27, .98) 70%); }
-.sos-count-ring { position: relative; width: 150px; height: 150px; margin-bottom: 10px; }
-.sos-count-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.sos-count-ring .bg { fill: none; stroke: rgba(255, 255, 255, .25); stroke-width: 7; }
-.sos-count-ring .fg { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; }
-.sos-count-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 64px; font-weight: 800; letter-spacing: -.04em; }
-.sos-count h2 { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: 38px; line-height: 1; }
-.sos-count p { margin: 0 0 18px; font-size: 15px; line-height: 1.45; opacity: .92; max-width: 300px; }
-.sos-count-now { width: 100%; height: 56px; border-radius: 18px; background: #fff; color: var(--red); font-size: 17px; font-weight: 800; }
-.sos-count-cancel { width: 100%; height: 56px; border-radius: 18px; border: 2px solid rgba(255, 255, 255, .75); color: #fff; font-size: 17px; font-weight: 800; }
-.sos-count.big h2 { font-size: 46px; }
-.sos-count.big p { font-size: 19px; }
-.sos-count.big .sos-count-now, .sos-count.big .sos-count-cancel { height: 70px; font-size: 24px; border-radius: 22px; }
-
+.help-ask { position: absolute; inset: 0; z-index: 70; display: flex; align-items: flex-end; padding: 0 14px 30px; background: rgba(42, 29, 63, .45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.help-ask-card { width: 100%; padding: 28px 22px 22px; border-radius: 34px; background: #FFF8EF; box-shadow: var(--sh-3); display: flex; flex-direction: column; gap: 14px; text-align: center; }
+.help-ask-card h2 { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: 44px; line-height: 1; }
+.help-ask-card p { margin: 0 0 6px; font-size: 20px; color: var(--ink-2); font-weight: 600; }
+.help-yes { height: 84px; border-radius: 26px; background: var(--red); color: #fff; font-size: 26px; font-weight: 800; box-shadow: 0 14px 30px -12px rgba(229, 56, 59, .6); }
+.help-no { height: 76px; border-radius: 26px; background: #fff; color: var(--ink); font-size: 24px; font-weight: 800; box-shadow: 0 0 0 2px var(--line) inset; }
+.help-note { font-size: 16px; color: var(--ink-2); font-weight: 600; }
+.sos-opt { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px; border-radius: 22px; text-align: left; box-shadow: 0 0 0 1.5px var(--line) inset; color: var(--ink-3); }
+.sos-opt b { display: block; font-size: 16px; color: var(--ink); }
+.sos-opt span:not(.sos-opt-ic) { font-size: 13px; color: var(--ink-2); }
+.sos-opt.red { background: #FFF1F1; box-shadow: 0 0 0 2px rgba(229, 56, 59, .35) inset; }
+.sos-opt.red b { color: var(--red); }
+.sos-opt-ic { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0; background: var(--red); color: #fff; }
+.sos-opt-ic.green { background: #22C55E; }
+.sos-opt-ic.plum { background: var(--plum); }
 /* =========================================================
    FILTER SHEET
    ========================================================= */

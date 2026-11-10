@@ -223,39 +223,26 @@ export function CountBadge({ n }: { n: number }) {
   );
 }
 
-/* ---------- emergency countdown ---------- */
+/* ---------- asking for help (no timers, no pressure) ---------- */
 
-/** One tap starts it, five seconds to cancel. No press-and-hold: in a real emergency there may be no time or strength for it. */
-export function SosCountdown({ open, onCancel, onDone, big, sub }: { open: boolean; onCancel: () => void; onDone: () => void; big?: boolean; sub: string }) {
-  const SECS = 5;
-  const [n, setN] = useState(SECS);
+/** Mom's side: one calm question, two huge answers. If she can't answer, family is called, not 911. */
+export function HelpAsk({ open, onYes, onNo, onSilent }: { open: boolean; onYes: () => void; onNo: () => void; onSilent: () => void }) {
   useEffect(() => {
     if (!open) return;
-    setN(SECS);
-    const id = setInterval(() => setN((x) => x - 1), 1000);
-    return () => clearInterval(id);
-  }, [open]);
-  useEffect(() => {
-    if (open && n <= 0) onDone();
-  }, [open, n, onDone]);
-
+    const id = setTimeout(onSilent, 30000);
+    return () => clearTimeout(id);
+  }, [open, onSilent]);
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className={`sos-count ${big ? "big" : ""}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="sos-count-ring">
-            <svg viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="54" className="bg" />
-              <motion.circle cx="60" cy="60" r="54" className="fg" pathLength={1} initial={{ pathLength: 1 }} animate={{ pathLength: 0 }} transition={{ duration: SECS, ease: "linear" }} />
-            </svg>
-            <AnimatePresence mode="popLayout">
-              <motion.b key={n} initial={{ scale: 1.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.7, opacity: 0 }}>{Math.max(n, 0)}</motion.b>
-            </AnimatePresence>
-          </div>
-          <h2>Calling for help</h2>
-          <p>{sub}</p>
-          <button className="sos-count-now" onClick={onDone}>Call now</button>
-          <button className="sos-count-cancel" onClick={onCancel}>Cancel</button>
+        <motion.div className="help-ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div className="help-ask-card" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={softSpring}>
+            <h2>Do you need help?</h2>
+            <p>We&apos;re right here, Kamala.</p>
+            <button className="help-yes" onClick={onYes}>Yes, call for help</button>
+            <button className="help-no" onClick={onNo}>I&apos;m okay</button>
+            <span className="help-note">If you don&apos;t answer, we&apos;ll call Rohan.</span>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -7,7 +7,7 @@ import { Check, ChevronLeft, Navigation, Phone, Pill, Sun } from "lucide-react";
 import { useCallback, useState } from "react";
 import { PEOPLE, helper } from "../data";
 import { StreetMap, useDrive } from "../map";
-import { Avatar, SosCountdown, Tap } from "../kit";
+import { Avatar, HelpAsk, Tap } from "../kit";
 import { useStore } from "../store";
 
 export function Mom() {
@@ -17,6 +17,7 @@ export function Mom() {
   const [pill, setPill] = useState(false);
   const [sos, setSos] = useState(false);
   const fire = useCallback(() => { setSos(false); go("emergency"); }, [go]);
+  const silent = useCallback(() => { setSos(false); toast("No answer, calling Rohan for you", "info"); }, [toast]);
 
   return (
     <div className="screen mom">
@@ -75,16 +76,16 @@ export function Mom() {
             ))}
           </div>
 
-          {/* one tap, then 5 seconds to cancel: no press-and-hold in an emergency */}
+          {/* one tap, then a calm yes / I'm okay. No press-and-hold, no countdown */}
           <Tap className="mom-sos" onClick={() => setSos(true)}>
             <b>I need help</b>
-            <span>Tap once · you can still cancel</span>
+            <span>Tap once</span>
           </Tap>
           <div style={{ height: 40 }} />
         </div>
       </div>
 
-      <SosCountdown big open={sos} onCancel={() => setSos(false)} onDone={fire} sub="Calling 911, Rohan, Anita and Sunita" />
+      <HelpAsk open={sos} onYes={fire} onNo={() => { setSos(false); toast("Glad you're okay", "heart"); }} onSilent={silent} />
     </div>
   );
 }

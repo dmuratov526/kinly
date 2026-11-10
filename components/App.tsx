@@ -32,7 +32,7 @@ const STORY: { id: ScreenId; title: string; why: string; points: string[] }[] = 
   { id: "visits", title: "Visits", why: "Track what you've booked", points: ["Upcoming and Past, the missing Job-to-be-done", "Live visit pinned to the top", "Rebook a favorite in one tap"] },
   { id: "live", title: "Live visit", why: "Peace of mind, in real time", points: ["Live map on real streets, with ETA", "Emergency button always in view", "Tasks tick off and photos arrive live"] },
   { id: "report", title: "Visit report", why: "Proof of care", points: ["Mood, meals, meds and steps at a glance", "Turn Sunita's note into a question for the doctor", "Rate in two taps"] },
-  { id: "mom", title: "Mom's phone", why: "Mom's own app, built for 78", points: ["A separate app: no tabs, nothing in the way", "Her door code and where Sunita is right now", "One tap for help, 5 seconds to cancel"] },
+  { id: "mom", title: "Mom's phone", why: "Mom's own app, built for 78", points: ["A separate app: no tabs, nothing in the way", "Her door code and where Sunita is right now", "One tap for help, then a calm yes / I'm okay"] },
   { id: "emergency", title: "Emergency", why: "When it really matters", points: ["911, family and a nurse in one tap", "Meds and allergies shared with responders", "Cancel if it was a false alarm"] },
 ];
 
