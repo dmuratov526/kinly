@@ -18,10 +18,11 @@ const ASK: { id: string; label: string; service: ServiceId; helperId: string; Ic
 ];
 
 export function Mom() {
-  const { go, toast, live, showLang, addRequest, requests } = useStore();
+  const { go, toast, live, showLang, addRequest, requests, resolveRequest } = useStore();
   const h = helper("sunita");
   const { p, mins } = useDrive(true);
   const [asking, setAsking] = useState<(typeof ASK)[number] | null>(null);
+  const [cancelling, setCancelling] = useState<(typeof ASK)[number] | null>(null);
   const [pill, setPill] = useState(false);
   const [sos, setSos] = useState(false);
   const fire = useCallback(() => { setSos(false); go("emergency"); }, [go]);
@@ -77,10 +78,10 @@ export function Mom() {
               {ASK.map((a) => {
                 const sent = requests.some((r) => r.id === a.id);
                 return (
-                  <Tap key={a.id} className={`mom-ask-tile ${sent ? "sent" : ""}`} onClick={() => (sent ? toast("Rohan has your request", "check") : setAsking(a))}>
+                  <Tap key={a.id} className={`mom-ask-tile ${sent ? "sent" : ""}`} onClick={() => (sent ? setCancelling(a) : setAsking(a))}>
                     <span className="mom-ask-ic" style={{ background: a.tint, color: a.hue }}>{sent ? <Check size={30} strokeWidth={3} /> : <a.Icon size={30} />}</span>
                     <b>{a.label}</b>
-                    {sent && <span>Sent to Rohan</span>}
+                    {sent && <span>Sent to Rohan · tap to cancel</span>}
                   </Tap>
                 );
               })}
@@ -114,8 +115,22 @@ export function Mom() {
       </div>
 
       <AnimatePresence>
+        {cancelling && (
+          <motion.div key="cancel" className="help-ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCancelling(null)}>
+            <motion.div className="help-ask-card" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ fontSize: 36 }}>Cancel your request?</h2>
+              <p>{cancelling.label}, {requests.find((r) => r.id === cancelling.id)?.when.toLowerCase()}</p>
+              <button className="help-yes" onClick={() => {
+                resolveRequest(cancelling.id);
+                setCancelling(null);
+                toast("Request cancelled. Rohan is told", "check");
+              }}>Yes, cancel it</button>
+              <button className="help-no" onClick={() => setCancelling(null)}>Keep it</button>
+            </motion.div>
+          </motion.div>
+        )}
         {asking && (
-          <motion.div className="help-ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAsking(null)}>
+          <motion.div key="ask" className="help-ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAsking(null)}>
             <motion.div className="help-ask-card" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
               <h2 style={{ fontSize: 38 }}>{asking.label}</h2>
               <p>When would you like it?</p>
