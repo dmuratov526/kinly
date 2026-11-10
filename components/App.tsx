@@ -12,6 +12,7 @@ import { HelperProfile } from "./screens/HelperProfile";
 import { Book } from "./screens/Book";
 import { Confirmed } from "./screens/Confirmed";
 import { Visits } from "./screens/Visits";
+import { VisitDetail } from "./screens/VisitDetail";
 import { Live } from "./screens/Live";
 import { Report } from "./screens/Report";
 import { Emergency, Mom, MomMap } from "./screens/Mom";
@@ -20,7 +21,7 @@ import { Chat } from "./screens/Chat";
 
 const SCREENS: Record<ScreenId, ComponentType> = {
   home: Home, explore: Explore, helper: HelperProfile, book: Book, confirmed: Confirmed, cart: Cart, chat: Chat,
-  visits: Visits, live: Live, report: Report, mom: Mom, momMap: MomMap, emergency: Emergency,
+  visits: Visits, visit: VisitDetail, live: Live, report: Report, mom: Mom, momMap: MomMap, emergency: Emergency,
 };
 
 /** The pitch, in order. Each step says what it fixes from the critique. */
@@ -38,7 +39,7 @@ const STORY: { id: ScreenId; title: string; why: string; points: string[] }[] = 
 ];
 
 const PARENT: Partial<Record<ScreenId, ScreenId>> = {
-  helper: "explore", book: "explore", confirmed: "home", chat: "home", live: "visits", report: "visits", emergency: "mom", momMap: "mom",
+  helper: "explore", book: "explore", confirmed: "home", chat: "home", live: "visits", visit: "visits", report: "visits", emergency: "mom", momMap: "mom",
 };
 const stackFor = (id: ScreenId): ScreenId[] =>
   TAB_ROOTS.includes(id) || id === "mom" ? [id] : id === "book" ? ["explore", "helper", "book"] : [PARENT[id] ?? "home", id];
@@ -70,6 +71,7 @@ export default function App() {
   const [safe, setSafe] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [chatWith, setChatWith] = useState("sunita");
+  const [visitId, setVisitId] = useState("v2");
   const [requests, setRequests] = useState<MomRequest[]>([]);
   const [splash, setSplash] = useState(true);
   const hideSplash = useCallback(() => setSplash(false), []);
@@ -141,6 +143,7 @@ export default function App() {
     explore, setExplore: (p) => setExploreState((e) => ({ ...e, ...p })),
     visits, addVisit: (v) => setVisits((vs) => [...vs.filter((x) => x.status !== "upcoming" || x.id !== v.id), v].sort((a, b) => (a.status === "live" ? -1 : b.status === "live" ? 1 : 0))),
     cancelVisit: (id) => setVisits((vs) => vs.filter((v) => v.id !== id)),
+    visitId, openVisit: (id) => { setVisitId(id); go("visit"); },
     cart,
     addToCart: (c) => setCart((cs) => [...cs.filter((x) => x.id !== c.id), c]),
     removeFromCart: (id) => setCart((cs) => cs.filter((x) => x.id !== id)),

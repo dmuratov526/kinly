@@ -9,7 +9,7 @@ import { Avatar, Btn, Sheet, Tap, softSpring } from "../kit";
 import { useStore } from "../store";
 
 export function Visits() {
-  const { visits, go, live, setDraft, toast, cancelVisit, openChat } = useStore();
+  const { visits, go, live, setDraft, toast, cancelVisit, openChat, openVisit } = useStore();
   const [tab, setTab] = useState<"up" | "past">("up");
   const [cancelling, setCancelling] = useState<Visit | null>(null);
   const cancel = (all: boolean) => {
@@ -65,7 +65,7 @@ export function Visits() {
               <AnimatePresence initial={false}>
               {upcoming.map((v, i) => (
                 <motion.div key={v.id} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.06 } }} exit={{ opacity: 0, x: -80, height: 0, marginTop: -14 }}>
-                  <Tap className="visit" onClick={() => { setDraft({ helperId: v.helperId, service: v.service }); go("helper"); }}>
+                  <Tap className="visit" onClick={() => openVisit(v.id)}>
                     <VisitBody v={v} />
                     <div className="visit-actions">
                       <span onClick={(e) => { e.stopPropagation(); toast("Reschedule options", "info"); }}>Reschedule</span>

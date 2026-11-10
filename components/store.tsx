@@ -5,7 +5,7 @@ import type { CartItem, ServiceId, Visit } from "./data";
 
 export type ScreenId =
   | "home" | "explore" | "helper" | "book" | "confirmed" | "cart" | "chat"
-  | "visits" | "live" | "report" | "mom" | "momMap" | "emergency";
+  | "visits" | "visit" | "live" | "report" | "mom" | "momMap" | "emergency";
 
 /** Rohan's app tabs. Mom's phone is its own app and has no tab bar. */
 export const TAB_ROOTS: ScreenId[] = ["home", "explore", "visits", "cart"];
@@ -55,6 +55,9 @@ export type Store = {
   visits: Visit[];
   addVisit: (v: Visit) => void;
   cancelVisit: (id: string) => void;
+  /** which upcoming visit the detail screen shows */
+  visitId: string;
+  openVisit: (id: string) => void;
 
   cart: CartItem[];
   addToCart: (c: CartItem) => void;
