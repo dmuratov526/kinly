@@ -93,6 +93,9 @@ export type Helper = {
   miles: number;
   langs: string[];
   cpr: boolean;
+  gender: "f" | "m";
+  /** nurse, aide or nursing student */
+  medical: boolean;
   services: ServiceId[];
   /** next free slot label and whether it is today */
   next: string;
@@ -110,7 +113,7 @@ export type Helper = {
 export const HELPERS: Helper[] = [
   {
     id: "sunita", name: "Sunita Rao", first: "Sunita", photo: "/img/sunita.jpg", role: "Former nurse's aide", years: 12,
-    rating: 4.97, reviews: 96, visits: 312, adj: 2, miles: 1.2, langs: ["Hindi", "English", "Marathi"], cpr: true,
+    rating: 4.97, reviews: 96, visits: 312, adj: 2, miles: 1.2, langs: ["Hindi", "English", "Marathi"], cpr: true, gender: "f", medical: true,
     services: ["companion", "escort", "wellness", "errands"], next: "Today · 2 PM", today: true, match: 98,
     daysOff: ["sat"], busy: ["9:00 AM"],
     bio: "I spent 12 years as a nurse's aide at Elmhurst Hospital. Now I help families the way I'd want someone to help my own mother: patiently, and always with a cup of chai.",
@@ -118,7 +121,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "maria", name: "Maria Gonzalez", first: "Maria", photo: "/img/maria.jpg", role: "Certified home health aide", years: 9,
-    rating: 4.92, reviews: 74, visits: 260, adj: 1, miles: 0.8, langs: ["Spanish", "English"], cpr: true,
+    rating: 4.92, reviews: 74, visits: 260, adj: 1, miles: 0.8, langs: ["Spanish", "English"], cpr: true, gender: "f", medical: true,
     services: ["home", "wellness", "companion"], next: "Today · 4 PM", today: true, match: 93,
     daysOff: [], busy: ["10:00 AM", "11:00 AM"],
     bio: "HHA certified, 9 years in Queens. I keep homes calm and tidy, cook a mean arroz con pollo, and always leave a note of what I did.",
@@ -126,7 +129,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "denise", name: "Denise Walker", first: "Denise", photo: "/img/denise.jpg", role: "Registered nurse (RN)", years: 15,
-    rating: 4.93, reviews: 120, visits: 488, adj: 3, miles: 3.1, langs: ["English", "Spanish"], cpr: true,
+    rating: 4.93, reviews: 120, visits: 488, adj: 3, miles: 3.1, langs: ["English", "Spanish"], cpr: true, gender: "f", medical: true,
     services: ["escort", "wellness"], next: "Fri · 10 AM", today: false, match: 88,
     daysOff: ["today", "tue"], busy: [],
     bio: "RN with 15 years in geriatrics. I translate doctor-speak into plain English and make sure nothing gets missed.",
@@ -134,7 +137,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "marcus", name: "Marcus Johnson", first: "Marcus", photo: "/img/marcus.jpg", role: "Former high school coach", years: 4,
-    rating: 4.89, reviews: 52, visits: 150, adj: 0, miles: 1.6, langs: ["English"], cpr: true,
+    rating: 4.89, reviews: 52, visits: 150, adj: 0, miles: 1.6, langs: ["English"], cpr: true, gender: "m", medical: false,
     services: ["companion", "errands", "home", "tech"], next: "Today · 3 PM", today: true, match: 90,
     daysOff: ["sun"], busy: ["9:00 AM"],
     bio: "Twenty years coaching basketball in the Bronx. Now I get folks moving again: short walks, groceries, heavy lifting, and a good story or two.",
@@ -142,7 +145,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "linda", name: "Linda Kowalski", first: "Linda", photo: "/img/linda.jpg", role: "Retired nurse (LPN)", years: 22,
-    rating: 4.95, reviews: 88, visits: 340, adj: 2, miles: 2.2, langs: ["English", "Polish"], cpr: true,
+    rating: 4.95, reviews: 88, visits: 340, adj: 2, miles: 2.2, langs: ["English", "Polish"], cpr: true, gender: "f", medical: true,
     services: ["wellness", "companion", "escort"], next: "Tomorrow · 9 AM", today: false, match: 89,
     daysOff: ["today"], busy: ["1:00 PM"],
     bio: "22 years as a nurse at Mount Sinai Queens. I check meds, meals and mood, and I notice the small things before they become big ones.",
@@ -150,7 +153,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "omar", name: "Omar Haddad", first: "Omar", photo: "/img/omar.jpg", role: "Caregiver and driver", years: 5,
-    rating: 4.87, reviews: 47, visits: 175, adj: 1, miles: 2.9, langs: ["Arabic", "English"], cpr: true,
+    rating: 4.87, reviews: 47, visits: 175, adj: 1, miles: 2.9, langs: ["Arabic", "English"], cpr: true, gender: "m", medical: false,
     services: ["escort", "errands"], next: "Today · 1 PM", today: true, match: 84,
     daysOff: ["fri"], busy: ["10:00 AM"],
     bio: "I drive a roomy Toyota Sienna with space for a walker. Doctor visits, pharmacy runs, the long line at the DMV: I've got it.",
@@ -158,7 +161,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "tom", name: "Tom Becker", first: "Tom", photo: "/img/tom.jpg", role: "Retired IT teacher", years: 3,
-    rating: 4.9, reviews: 39, visits: 112, adj: 1, miles: 3.4, langs: ["English", "German"], cpr: true,
+    rating: 4.9, reviews: 39, visits: 112, adj: 1, miles: 3.4, langs: ["English", "German"], cpr: true, gender: "m", medical: false,
     services: ["tech", "errands"], next: "Tomorrow · 10 AM", today: false, match: 80,
     daysOff: ["today", "sat"], busy: ["2:00 PM"],
     bio: "I taught computers for 30 years, so nothing is a silly question. Video calls, bigger text, blocking spam calls, all at your pace.",
@@ -166,7 +169,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "grace", name: "Grace Okafor", first: "Grace", photo: "/img/grace.jpg", role: "Nursing student, NYU", years: 2,
-    rating: 4.8, reviews: 18, visits: 46, adj: 0, miles: 1.9, langs: ["English", "Igbo"], cpr: true,
+    rating: 4.8, reviews: 18, visits: 46, adj: 0, miles: 1.9, langs: ["English", "Igbo"], cpr: true, gender: "f", medical: true,
     services: ["companion", "errands", "tech", "home"], next: "Today · 1 PM", today: true, match: 82,
     daysOff: ["fri"], busy: ["9:00 AM", "10:00 AM"],
     bio: "Nursing student who grew up caring for my grandma. Upbeat, reliable, and great at board games.",
@@ -174,7 +177,7 @@ export const HELPERS: Helper[] = [
   },
   {
     id: "mei", name: "Mei Lin", first: "Mei", photo: "/img/mei.jpg", role: "Caregiver and driver", years: 6,
-    rating: 4.88, reviews: 63, visits: 190, adj: 1, miles: 2.7, langs: ["English", "Mandarin"], cpr: true,
+    rating: 4.88, reviews: 63, visits: 190, adj: 1, miles: 2.7, langs: ["English", "Mandarin"], cpr: true, gender: "f", medical: false,
     services: ["escort", "errands", "companion"], next: "Today · 3 PM", today: true, match: 85,
     daysOff: ["sat"], busy: ["1:00 PM"],
     bio: "I have a clean, roomy Honda CR-V and a lot of patience for long pharmacy lines.",

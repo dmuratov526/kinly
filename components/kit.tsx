@@ -84,7 +84,7 @@ export function Btn({ kind = "primary", children, className = "", ...p }: TapPro
 /* ---------- sheet ---------- */
 
 /** Rendered into the phone screen itself, so it covers everything even when the page underneath is scrolled. */
-export function Sheet({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: ReactNode; title?: string }) {
+export function Sheet({ open, onClose, children, title, className = "" }: { open: boolean; onClose: () => void; children: ReactNode; title?: string; className?: string }) {
   const [host, setHost] = useState<Element | null>(null);
   useEffect(() => setHost(document.querySelector(".screen-glass")), []);
   if (!host) return null;
@@ -93,7 +93,7 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
       {open && (
         <motion.div className="sheet-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
           <motion.div
-            className="sheet"
+            className={`sheet ${className}`}
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={softSpring}
             drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i: PanInfo) => { if (i.offset.y > 90 || i.velocity.y > 500) onClose(); }}

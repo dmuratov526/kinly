@@ -7,6 +7,7 @@ import { DAYS, HELPERS, SERVICES, TIMES, cardRate, day, isFree, svc, type Helper
 import { SERVICE_ICON } from "../icons";
 import { Avatar, Btn, CartButton, KinlySafe, Rating, Sheet, Tap, Verified, softSpring } from "../kit";
 import { NO_FILTERS, useStore, type Filters } from "../store";
+import { FilterSheet, activeCount, passes } from "./FilterSheet";
 
 /** Quick chips are shortcuts into the same filters the filter sheet edits. */
 const QUICK: { id: string; label: string; on: (f: Filters) => boolean; toggle: (f: Filters) => Partial<Filters> }[] = [
@@ -16,19 +17,6 @@ const QUICK: { id: string; label: string; on: (f: Filters) => boolean; toggle: (
   { id: "near", label: "Under 2 mi", on: (f) => f.maxMiles === 2, toggle: (f) => ({ maxMiles: f.maxMiles === 2 ? null : 2 }) },
   { id: "car", label: "Has a car", on: (f) => f.car, toggle: (f) => ({ car: !f.car }) },
 ];
-
-const LANGS = [...new Set(HELPERS.flatMap((h) => h.langs))].filter((l) => l !== "English");
-
-const passes = (h: Helper, f: Filters, service: ServiceId | null) =>
-  (!f.today || h.today) &&
-  (!f.langs.length || f.langs.some((l) => h.langs.includes(l))) &&
-  (f.minRating == null || h.rating >= f.minRating) &&
-  (f.maxMiles == null || h.miles < f.maxMiles) &&
-  (f.maxRate == null || cardRate(h, service).rate <= f.maxRate) &&
-  (!f.car || h.badges.includes("Has a car"));
-
-const activeCount = (f: Filters) =>
-  Number(f.today) + f.langs.length + Number(f.minRating != null) + Number(f.maxMiles != null) + Number(f.maxRate != null) + Number(f.car);
 
 export function Explore() {
   const { explore, setExplore, go, setDraft, favs, toggleFav, toast } = useStore();
@@ -57,7 +45,7 @@ export function Explore() {
     .filter((h) => !explore.service || h.services.includes(explore.service))
     .filter((h) => !query || [h.name, h.role, ...h.langs, ...h.services.map((s) => svc(s).name)].some((x) => x.toLowerCase().includes(query)))
     .filter((h) => !explore.when || isFree(h, explore.when.dayKey, explore.when.time));
-  const list = base.filter((h) => passes(h, f, explore.service)).sort(SORTS[sort].fn);
+  const list = base.filter((h) => passes(h, f, explore.service, favs)).sort(SORTS[sort].fn);
   const nActive = activeCount(f);
 
   const open = (h: Helper) => {
@@ -157,52 +145,7 @@ export function Explore() {
         <div style={{ height: 120 }} />
       </div>
 
-      <Sheet open={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filters">
-        <div className="filters">
-          <div>
-            <h4>Price{explore.service ? ` · ${svc(explore.service).name.toLowerCase()}` : ""}</h4>
-            <div className="chip-wrap">
-              {[null, 18, 20, 25].map((v) => (
-                <Tap key={String(v)} className={`chip ${f.maxRate === v ? "on" : ""}`} onClick={() => setF({ maxRate: v })}>{v == null ? "Any" : `$${v} or less`}</Tap>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4>Speaks</h4>
-            <div className="chip-wrap">
-              {LANGS.map((l) => (
-                <Tap key={l} className={`chip ${f.langs.includes(l) ? "on" : ""}`} onClick={() => setF({ langs: f.langs.includes(l) ? f.langs.filter((x) => x !== l) : [...f.langs, l] })}>{l}</Tap>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4>Rating</h4>
-            <div className="chip-wrap">
-              {[null, 4.8, 4.9].map((v) => (
-                <Tap key={String(v)} className={`chip ${f.minRating === v ? "on" : ""}`} onClick={() => setF({ minRating: v })}>{v == null ? "Any" : `${v}+ ★`}</Tap>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4>Distance from Mom</h4>
-            <div className="chip-wrap">
-              {[null, 1, 2, 3].map((v) => (
-                <Tap key={String(v)} className={`chip ${f.maxMiles === v ? "on" : ""}`} onClick={() => setF({ maxMiles: v })}>{v == null ? "Any" : `Under ${v} mi`}</Tap>
-              ))}
-            </div>
-          </div>
-          <div className="chip-wrap">
-            <Tap className={`chip ${f.today ? "on" : ""}`} onClick={() => setF({ today: !f.today })}>Free today</Tap>
-            <Tap className={`chip ${f.car ? "on" : ""}`} onClick={() => setF({ car: !f.car })}>Has a car</Tap>
-          </div>
-        </div>
-        <div className="row" style={{ gap: 10, marginTop: 18 }}>
-          <Btn kind="soft" onClick={() => setF(NO_FILTERS)} disabled={!nActive}>Reset</Btn>
-          <Btn kind="primary" style={{ flex: 1 }} onClick={() => setFiltersOpen(false)}>
-            {list.length ? `Show ${list.length} helper${list.length === 1 ? "" : "s"}` : "No matches"}
-          </Btn>
-        </div>
-      </Sheet>
+      <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} f={f} setF={setF} base={base} service={explore.service} favs={favs} />
 
       <Sheet open={whenOpen} onClose={() => setWhenOpen(false)} title="When does Mom need help?">
         <div className="day-strip" style={{ margin: "0 -20px", padding: "0 20px" }}>

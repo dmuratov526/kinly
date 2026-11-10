@@ -30,8 +30,11 @@ export type Filters = {
   maxMiles: number | null;
   maxRate: number | null;
   car: boolean;
+  gender: "any" | "f" | "m";
+  medical: boolean;
+  saved: boolean;
 };
-export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, car: false };
+export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, car: false, gender: "any", medical: false, saved: false };
 
 export type Store = {
   screen: ScreenId;
