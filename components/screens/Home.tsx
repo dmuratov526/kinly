@@ -8,6 +8,9 @@ import { ServiceGlyph } from "../icons";
 import { Avatar, CartButton, KinlySafe, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
 import { useStore } from "../store";
 
+/** who you've booked before, and for what */
+const AGAIN = { sunita: "companion", maria: "home", denise: "escort", tom: "tech", marcus: "errands" } as const;
+
 const LIVE_COPY = [
   { tag: "On the way", title: "Sunita is 6 min away", sub: "Arriving at Mom's around 1:58 PM", pct: 12 },
   { tag: "Arrived", title: "Sunita just checked in", sub: "PIN verified at the door · 2:01 PM", pct: 30 },
@@ -137,13 +140,13 @@ export function Home() {
             <div className="reminder-icon"><Sparkles size={18} /></div>
             <div className="grow">
               <b>No home help in 13 days</b>
-              <p>Meera is free today at 4 PM, 0.8 mi from Mom.</p>
+              <p>Maria is free today at 4 PM, 0.8 mi from Mom.</p>
               <div className="row" style={{ gap: 8, marginTop: 10 }}>
-                <Tap className="mini-btn dark" onClick={() => openHelper("meera", "home")}>Book Meera again</Tap>
+                <Tap className="mini-btn dark" onClick={() => openHelper("maria", "home")}>Book Maria again</Tap>
                 <Tap className="mini-btn" onClick={() => toast("We'll remind you next week", "info")}>Later</Tap>
               </div>
             </div>
-            <Avatar src={helper("meera").photo} size={48} />
+            <Avatar src={helper("maria").photo} size={48} />
           </div>
         </Rise>
       </Stagger>
@@ -151,15 +154,14 @@ export function Home() {
       {/* book again */}
       <Section title="Book again" action="See all" onAction={() => go("visits")} style={{ marginTop: 26 }}>
         <div className="hscroll">
-          {(["sunita", "meera", "denise", "priya"] as const).map((id, i) => {
+          {(["sunita", "maria", "denise", "tom", "marcus"] as const).map((id, i) => {
             const h = helper(id);
-            const s = svc(h.services[0]);
             return (
               <motion.div key={id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 + i * 0.06, type: "spring", stiffness: 260, damping: 28 }}>
-                <Tap className="again" onClick={() => openHelper(id, id === "denise" ? "escort" : id === "meera" ? "home" : id === "priya" ? "tech" : "companion")}>
+                <Tap className="again" onClick={() => openHelper(id, AGAIN[id])}>
                   <Avatar src={h.photo} size={56} />
                   <b>{h.first}</b>
-                  <span>{id === "denise" ? "Doctor visits" : id === "meera" ? "Home help" : id === "priya" ? "Tech help" : s.name}</span>
+                  <span>{svc(AGAIN[id]).name}</span>
                   <span className="again-plus"><Plus size={14} strokeWidth={3} /></span>
                 </Tap>
               </motion.div>

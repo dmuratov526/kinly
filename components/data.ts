@@ -117,20 +117,12 @@ export const HELPERS: Helper[] = [
     badges: ["Top Helper", "Hindi speaker"], onTime: 99, repeat: 87,
   },
   {
-    id: "priya", name: "Priya Kapoor", first: "Priya", photo: "/img/priya.jpg", role: "Retired schoolteacher", years: 5,
-    rating: 4.9, reviews: 58, visits: 140, adj: 1, miles: 2.4, langs: ["Hindi", "Punjabi", "English"], cpr: true,
-    services: ["companion", "tech", "errands"], next: "Tomorrow · 9 AM", today: false, match: 94,
-    daysOff: ["today"], busy: ["1:00 PM", "2:00 PM"],
-    bio: "Thirty years teaching fourth grade made me very, very patient. I love teaching seniors to video-call their grandkids.",
-    badges: ["Tech whiz", "Hindi speaker"], onTime: 97, repeat: 81,
-  },
-  {
-    id: "meera", name: "Meera Shah", first: "Meera", photo: "/img/meera.jpg", role: "Certified home health aide", years: 8,
-    rating: 4.85, reviews: 41, visits: 205, adj: 1, miles: 0.8, langs: ["Gujarati", "Hindi", "English"], cpr: true,
-    services: ["home", "wellness", "companion", "errands"], next: "Today · 4 PM", today: true, match: 91,
+    id: "maria", name: "Maria Gonzalez", first: "Maria", photo: "/img/maria.jpg", role: "Certified home health aide", years: 9,
+    rating: 4.92, reviews: 74, visits: 260, adj: 1, miles: 0.8, langs: ["Spanish", "English"], cpr: true,
+    services: ["home", "wellness", "companion"], next: "Today · 4 PM", today: true, match: 93,
     daysOff: [], busy: ["10:00 AM", "11:00 AM"],
-    bio: "HHA certified, 8 years in Jackson Heights. I keep homes calm and tidy, and I always leave a note of what I did.",
-    badges: ["HHA certified", "Closest"], onTime: 98, repeat: 84,
+    bio: "HHA certified, 9 years in Queens. I keep homes calm and tidy, cook a mean arroz con pollo, and always leave a note of what I did.",
+    badges: ["HHA certified", "Closest"], onTime: 98, repeat: 86,
   },
   {
     id: "denise", name: "Denise Walker", first: "Denise", photo: "/img/denise.jpg", role: "Registered nurse (RN)", years: 15,
@@ -139,6 +131,38 @@ export const HELPERS: Helper[] = [
     daysOff: ["today", "tue"], busy: [],
     bio: "RN with 15 years in geriatrics. I translate doctor-speak into plain English and make sure nothing gets missed.",
     badges: ["Registered nurse", "Has a car"], onTime: 99, repeat: 90,
+  },
+  {
+    id: "marcus", name: "Marcus Johnson", first: "Marcus", photo: "/img/marcus.jpg", role: "Former high school coach", years: 4,
+    rating: 4.89, reviews: 52, visits: 150, adj: 0, miles: 1.6, langs: ["English"], cpr: true,
+    services: ["companion", "errands", "home", "tech"], next: "Today · 3 PM", today: true, match: 90,
+    daysOff: ["sun"], busy: ["9:00 AM"],
+    bio: "Twenty years coaching basketball in the Bronx. Now I get folks moving again: short walks, groceries, heavy lifting, and a good story or two.",
+    badges: ["Great for walks", "Heavy lifting"], onTime: 97, repeat: 83,
+  },
+  {
+    id: "linda", name: "Linda Kowalski", first: "Linda", photo: "/img/linda.jpg", role: "Retired nurse (LPN)", years: 22,
+    rating: 4.95, reviews: 88, visits: 340, adj: 2, miles: 2.2, langs: ["English", "Polish"], cpr: true,
+    services: ["wellness", "companion", "escort"], next: "Tomorrow · 9 AM", today: false, match: 89,
+    daysOff: ["today"], busy: ["1:00 PM"],
+    bio: "22 years as a nurse at Mount Sinai Queens. I check meds, meals and mood, and I notice the small things before they become big ones.",
+    badges: ["Former nurse", "Meds expert"], onTime: 99, repeat: 91,
+  },
+  {
+    id: "omar", name: "Omar Haddad", first: "Omar", photo: "/img/omar.jpg", role: "Caregiver and driver", years: 5,
+    rating: 4.87, reviews: 47, visits: 175, adj: 1, miles: 2.9, langs: ["Arabic", "English"], cpr: true,
+    services: ["escort", "errands"], next: "Today · 1 PM", today: true, match: 84,
+    daysOff: ["fri"], busy: ["10:00 AM"],
+    bio: "I drive a roomy Toyota Sienna with space for a walker. Doctor visits, pharmacy runs, the long line at the DMV: I've got it.",
+    badges: ["Has a car", "Clean record"], onTime: 98, repeat: 80,
+  },
+  {
+    id: "tom", name: "Tom Becker", first: "Tom", photo: "/img/tom.jpg", role: "Retired IT teacher", years: 3,
+    rating: 4.9, reviews: 39, visits: 112, adj: 1, miles: 3.4, langs: ["English", "German"], cpr: true,
+    services: ["tech", "errands"], next: "Tomorrow · 10 AM", today: false, match: 80,
+    daysOff: ["today", "sat"], busy: ["2:00 PM"],
+    bio: "I taught computers for 30 years, so nothing is a silly question. Video calls, bigger text, blocking spam calls, all at your pace.",
+    badges: ["Tech whiz", "Very patient"], onTime: 99, repeat: 85,
   },
   {
     id: "grace", name: "Grace Okafor", first: "Grace", photo: "/img/grace.jpg", role: "Nursing student, NYU", years: 2,
@@ -160,9 +184,9 @@ export const HELPERS: Helper[] = [
 export const helper = (id: string) => HELPERS.find((h) => h.id === id) ?? HELPERS[0];
 
 export const REVIEWS = [
-  { who: "Anjali M.", rel: "daughter", photo: "/img/rev1.jpg", when: "2 weeks ago", stars: 5, text: "My father now asks every Monday when Sunita is coming. She sends photos after every walk and the notes from his cardiologist were better than mine." },
-  { who: "David K.", rel: "son", photo: "/img/rev3.jpg", when: "1 month ago", stars: 5, text: "Calm, punctual, kind. She noticed Mom's new dizziness before we did and flagged it right away." },
-  { who: "Leila S.", rel: "granddaughter", photo: "/img/rev2.jpg", when: "1 month ago", stars: 5, text: "Nani lit up the moment Sunita spoke Hindi with her. Worth every penny." },
+  { who: "Anjali M.", rel: "daughter", photo: "/img/rev1.jpg", when: "2 weeks ago", stars: 5, text: "My father now asks every Monday when Sunita is coming. Sunita sends photos after every walk and the notes from his cardiologist were better than mine." },
+  { who: "David K.", rel: "son", photo: "/img/rev3.jpg", when: "1 month ago", stars: 5, text: "Calm, punctual, kind. Sunita noticed Mom's new dizziness before we did and flagged it right away." },
+  { who: "Leila S.", rel: "granddaughter", photo: "/img/rev2.jpg", when: "1 month ago", stars: 5, text: "Grandma lit up the moment Sunita walked in. Worth every penny." },
 ];
 
 export const PEOPLE = {
@@ -238,9 +262,9 @@ export const SEED_VISITS: Visit[] = [
   { id: "v2", helperId: "denise", service: "escort", dayKey: "tue", dateLabel: "Tue, Nov 17", time: "10:00 AM", hours: 2, status: "upcoming", total: totalFor("denise", "escort", 2) },
   { id: "v3", helperId: "sunita", service: "companion", dayKey: "thu2", dateLabel: "Thu, Nov 19", time: "2:00 PM", hours: 3, status: "upcoming", weekly: true, total: totalFor("sunita", "companion", 3) },
   { id: "p1", helperId: "sunita", service: "companion", dayKey: "p1", dateLabel: "Thu, Nov 5", time: "2:00 PM", hours: 3, status: "past", weekly: true, rated: 5, summary: "Walked to the park, played rummy, Mom won twice.", total: totalFor("sunita", "companion", 3) },
-  { id: "p2", helperId: "meera", service: "home", dayKey: "p2", dateLabel: "Fri, Oct 30", time: "11:00 AM", hours: 2, status: "past", rated: 5, summary: "Kitchen deep clean, laundry, fresh sheets.", total: totalFor("meera", "home", 2) },
+  { id: "p2", helperId: "maria", service: "home", dayKey: "p2", dateLabel: "Fri, Oct 30", time: "11:00 AM", hours: 2, status: "past", rated: 5, summary: "Kitchen deep clean, laundry, fresh sheets.", total: totalFor("maria", "home", 2) },
   { id: "p3", helperId: "denise", service: "escort", dayKey: "p3", dateLabel: "Tue, Oct 27", time: "9:30 AM", hours: 3, status: "past", rated: 5, summary: "Cardiology follow-up. BP is stable, keep current dose.", total: totalFor("denise", "escort", 3) },
-  { id: "p4", helperId: "priya", service: "tech", dayKey: "p4", dateLabel: "Sat, Oct 24", time: "1:00 PM", hours: 1, status: "past", rated: 4, summary: "Set up WhatsApp video. Mom called you herself!", total: totalFor("priya", "tech", 1) },
+  { id: "p4", helperId: "tom", service: "tech", dayKey: "p4", dateLabel: "Sat, Oct 24", time: "1:00 PM", hours: 1, status: "past", rated: 4, summary: "Set up WhatsApp video. Mom called you herself!", total: totalFor("tom", "tech", 1) },
 ];
 
 /* ---------- cart ---------- */

@@ -158,7 +158,7 @@ export function HelperProfile() {
                       <div className="stars-sm">{"★★★★★".slice(0, r.stars)}</div>
                     </div>
                   </div>
-                  <p>{r.text.replace("Sunita", h.first)}</p>
+                  <p>{r.text.replaceAll("Sunita", h.first)}</p>
                 </div>
               ))}
             </div>
