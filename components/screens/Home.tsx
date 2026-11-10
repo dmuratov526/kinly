@@ -18,6 +18,20 @@ const LIVE_COPY = [
 export function Home() {
   const { go, live, setExplore, setDraft, toast, showSafe } = useStore();
   const [careSheet, setCareSheet] = useState(false);
+  const [people, setPeople] = useState<{ name: string; photo?: string }[]>([{ name: "Mom", photo: PEOPLE.mom.photo }]);
+  const [who, setWho] = useState(0);
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+  const addPerson = () => {
+    const name = newName.trim();
+    if (!name) return;
+    setPeople((ps) => [...ps, { name }]);
+    setWho(people.length);
+    setNewName("");
+    setAdding(false);
+    setCareSheet(false);
+    toast(`${name} added. You can book help for them now`, "check");
+  };
   const L = LIVE_COPY[live];
   const sunita = helper("sunita");
 
@@ -55,8 +69,8 @@ export function Home() {
         {/* who we're caring for */}
         <Rise>
           <Tap className="care-pill" onClick={() => setCareSheet(true)}>
-            <Avatar src={PEOPLE.mom.photo} size={30} />
-            <span>Caring for <b>Mom</b></span>
+            <PersonAvatar p={people[who]} size={30} />
+            <span>Caring for <b>{people[who].name}</b></span>
             <ChevronDown size={16} />
           </Tap>
         </Rise>
@@ -222,13 +236,28 @@ export function Home() {
         <div style={{ height: 110 }} />
       </div>
 
-      <Sheet open={careSheet} onClose={() => setCareSheet(false)} title="Who are you caring for?">
+      <Sheet open={careSheet} onClose={() => { setCareSheet(false); setAdding(false); }} title="Who are you caring for?">
         <div className="stack-10">
-          <Tap className="care-opt on" onClick={() => setCareSheet(false)}>
-            <Avatar src={PEOPLE.mom.photo} size={48} />
-            <div className="grow" style={{ textAlign: "left" }}><b>Mom</b></div>
-            <span className="radio on" />
-          </Tap>
+          {people.map((x, i) => (
+            <Tap key={x.name + i} className={`care-opt ${who === i ? "on" : ""}`} onClick={() => { setWho(i); setCareSheet(false); }}>
+              <PersonAvatar p={x} size={48} />
+              <div className="grow" style={{ textAlign: "left" }}><b>{x.name}</b></div>
+              <span className={`radio ${who === i ? "on" : ""}`} />
+            </Tap>
+          ))}
+          {adding ? (
+            <div className="care-opt care-new">
+              <span className="care-add"><UserPlus size={22} /></span>
+              <input autoFocus placeholder="Name, e.g. Dad" value={newName} onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") addPerson(); }} />
+              <Tap className="mini-btn dark" onClick={addPerson} disabled={!newName.trim()}>Add</Tap>
+            </div>
+          ) : (
+            <Tap className="care-opt" onClick={() => setAdding(true)}>
+              <span className="care-add"><Plus size={22} /></span>
+              <div className="grow" style={{ textAlign: "left" }}><b>Add someone</b></div>
+            </Tap>
+          )}
         </div>
       </Sheet>
     </div>
@@ -280,4 +309,9 @@ function MomsUsual() {
       )}
     </div>
   );
+}
+
+function PersonAvatar({ p, size }: { p: { name: string; photo?: string }; size: number }) {
+  if (p.photo) return <Avatar src={p.photo} size={size} />;
+  return <span className="initial-avatar" style={{ width: size, height: size, fontSize: size * 0.42 }}>{p.name[0]?.toUpperCase()}</span>;
 }
