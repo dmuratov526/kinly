@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Check, ChevronLeft, Clock, Footprints, Heart, Pill, Quote, Share, Star, Utensils } from "lucide-react";
+import { Check, ChevronLeft, Clock, Footprints, Heart, MessageCirclePlus, Pill, Quote, Share, Star, Utensils } from "lucide-react";
 import { useState } from "react";
 import { PEOPLE, helper } from "../data";
 import { Avatar, Btn, Tap } from "../kit";
@@ -15,6 +15,7 @@ export function Report() {
   const [stars, setStars] = useState(0);
   const [tags, setTags] = useState<string[]>([]);
   const [sent, setSent] = useState(false);
+  const [asked, setAsked] = useState(false);
 
   return (
     <div className="screen">
@@ -62,6 +63,12 @@ export function Report() {
             <Quote size={22} />
             <p>Kamala walked the whole park loop without her cane today and beat me at rummy twice. She mentioned her left knee feels stiff in the mornings. Might be worth asking Dr. Mehta on the 17th.</p>
             <div className="row" style={{ gap: 8 }}><Avatar src={h.photo} size={26} /><span className="small"><b>Sunita</b> · note for the family</span></div>
+            <Tap className={`quote-btn ${asked ? "done" : ""}`} disabled={asked}
+              onClick={() => { setAsked(true); toast("Added to Denise's list for Nov 17", "check"); }}>
+              {asked
+                ? <><Check size={16} strokeWidth={3} /> Added to questions for Nov 17</>
+                : <><MessageCirclePlus size={17} /> Add to questions for the Nov 17 doctor visit</>}
+            </Tap>
           </div>
 
           <div>
@@ -78,10 +85,10 @@ export function Report() {
           </div>
 
           <div className="receipt">
-            <div className="receipt-row"><span>3 hrs × $32</span><span>$96</span></div>
-            <div className="receipt-row"><span>Kinly care fee & insurance</span><span>$7.68</span></div>
-            <div className="receipt-row"><span>Anita&apos;s half</span><span className="ok-text">− $51.84</span></div>
-            <div className="receipt-total"><span>Charged to Visa ·· 4242</span><b>$51.84</b></div>
+            <div className="receipt-row"><span>3 hrs × $20</span><span>$60</span></div>
+            <div className="receipt-row"><span>Kinly care fee (5%)</span><span>$3.00</span></div>
+            <div className="receipt-row"><span>Anita&apos;s half</span><span className="ok-text">− $31.50</span></div>
+            <div className="receipt-total"><span>Charged to Visa ·· 4242</span><b>$31.50</b></div>
           </div>
 
           {/* rate */}

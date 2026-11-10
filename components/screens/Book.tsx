@@ -1,15 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, CreditCard, Minus, Plus, Repeat, Users } from "lucide-react";
+import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart, Users } from "lucide-react";
 import { useState } from "react";
-import { DAYS, TIMES, day, endTime, helper, isFree, priceFor, svc } from "../data";
+import { DAYS, FEE, TIMES, cartItem, day, endTime, helper, isFree, priceFor, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
 import { Avatar, Rating, SlideToConfirm, Tap, TopBar, Verified, spring } from "../kit";
 import { useStore } from "../store";
 
 export function Book() {
-  const { draft, setDraft, go, addVisit } = useStore();
+  const { draft, setDraft, go, tab, addVisit, addToCart, setLastBooking, cart, toast } = useStore();
   const h = helper(draft.helperId);
   const s = svc(draft.service);
   const [adding, setAdding] = useState("");
@@ -20,7 +20,15 @@ export function Book() {
   const p = priceFor(h, s, draft.hours);
   const yours = split ? Math.round(p.total / 2) : p.total;
 
+  const item = () => cartItem(h.id, s.id, draft.dayKey, draft.time, s.unit === "visit" ? 1 : draft.hours, draft.weekly);
+  const toCart = () => {
+    addToCart(item());
+    toast(`Added to cart · ${cart.length + 1} visit${cart.length ? "s" : ""}`, "check");
+    tab("cart");
+  };
+
   const confirm = () => {
+    setLastBooking([item()]);
     addVisit({
       id: `v-${Date.now()}`, helperId: h.id, service: s.id, dayKey: draft.dayKey, dateLabel: day(draft.dayKey).label,
       time: draft.time, hours: draft.hours, status: "upcoming", weekly: draft.weekly, total: p.total,
@@ -127,8 +135,8 @@ export function Book() {
 
           {/* price */}
           <div className="receipt">
-            <div className="receipt-row"><span>{s.unit === "visit" ? "Wellness visit" : `${draft.hours} hrs × $${h.rate}`}</span><span>${p.base}</span></div>
-            <div className="receipt-row"><span>Kinly care fee & insurance</span><span>${p.fee.toFixed(2)}</span></div>
+            <div className="receipt-row"><span>{s.unit === "visit" ? "Wellness visit" : `${draft.hours} hrs × $${rateFor(h, s)}`}</span><span>${p.base}</span></div>
+            <div className="receipt-row"><span>Kinly care fee ({FEE * 100}%)</span><span>${p.fee.toFixed(2)}</span></div>
             <Tap className="receipt-row split" onClick={() => setSplit(!split)}>
               <span className="row" style={{ gap: 8 }}><Users size={16} /> Split with Anita</span>
               <span className={`switch sm ${split ? "on" : ""}`}><motion.i layout transition={spring} /></span>
@@ -137,7 +145,7 @@ export function Book() {
               <span>You pay {split && <em>(half)</em>}</span>
               <motion.b key={yours} initial={{ scale: 1.15 }} animate={{ scale: 1 }}>${yours}</motion.b>
             </div>
-            <div className="pay-method"><CreditCard size={16} /> Visa ·· 4242 · charged after the visit</div>
+            <div className="pay-method"><CreditCard size={16} /> Visa ·· 4242 · charged after the visit · free cancellation until 24 hrs before</div>
           </div>
           <div style={{ height: 120 }} />
         </div>
@@ -145,7 +153,9 @@ export function Book() {
 
       <div className="dock column">
         <SlideToConfirm disabled={!canBook} label={canBook ? `Slide to book · $${yours}` : "Pick an open time"} onDone={confirm} />
-        <span className="dock-note">Free cancellation until 24 hrs before</span>
+        <Tap className="btn soft add-cart" disabled={!canBook} onClick={toCart}>
+          <ShoppingCart size={18} /> Add to cart, keep browsing
+        </Tap>
       </div>
     </div>
   );

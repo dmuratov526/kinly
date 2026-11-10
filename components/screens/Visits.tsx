@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronRight, FileText, Repeat, RotateCcw, Star } from "lucide-react";
 import { useState } from "react";
-import { endTime, helper, svc, type Visit } from "../data";
+import { DAYS, endTime, helper, svc, type Visit } from "../data";
 import { ServiceGlyph } from "../icons";
 import { Avatar, Tap, softSpring } from "../kit";
 import { useStore } from "../store";
@@ -13,7 +13,8 @@ export function Visits() {
   const [tab, setTab] = useState<"up" | "past">("up");
 
   const liveVisit = visits.find((v) => v.status === "live");
-  const upcoming = visits.filter((v) => v.status === "upcoming");
+  const order = (v: Visit) => { const i = DAYS.findIndex((d) => d.key === v.dayKey); return i < 0 ? 99 : i; };
+  const upcoming = visits.filter((v) => v.status === "upcoming").sort((a, b) => order(a) - order(b));
   const past = [
     ...(liveVisit && live === 3 ? [{ ...liveVisit, status: "past" as const, summary: "Chai, a walk in the park and two rounds of rummy." }] : []),
     ...visits.filter((v) => v.status === "past"),
@@ -102,12 +103,13 @@ export function Visits() {
 function VisitBody({ v }: { v: Visit }) {
   const h = helper(v.helperId);
   const s = svc(v.service);
+  const d = DAYS.find((x) => x.key === v.dayKey);
   const [dow, rest] = v.dateLabel.includes(",") ? v.dateLabel.split(", ") : [v.dateLabel, ""];
   return (
     <div className="visit-body">
       <div className="date-tile" style={{ ["--hue" as string]: s.hue, ["--tint" as string]: s.tint }}>
-        <span>{rest ? dow : v.dateLabel === "Today" ? "TODAY" : dow}</span>
-        <b>{rest ? rest.split(" ")[1] : "12"}</b>
+        <span>{d ? (d.key === "today" ? "TODAY" : d.dow) : dow}</span>
+        <b>{d ? d.num : rest.split(" ")[1]}</b>
       </div>
       <div className="grow" style={{ minWidth: 0, textAlign: "left" }}>
         <div className="row" style={{ gap: 6 }}>

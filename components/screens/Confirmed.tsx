@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { BellRing, CalendarPlus, Check, MessageSquareHeart, Users } from "lucide-react";
 import { useMemo } from "react";
 import { PEOPLE, day, endTime, helper, svc } from "../data";
+import { ServiceGlyph } from "../icons";
 import { Avatar, Btn, Tap } from "../kit";
 import { useStore } from "../store";
 
@@ -38,10 +39,12 @@ function Confetti() {
 }
 
 export function Confirmed() {
-  const { draft, tab, toast } = useStore();
-  const h = helper(draft.helperId);
-  const s = svc(draft.service);
-  const d = day(draft.dayKey);
+  const { draft, tab, toast, lastBooking } = useStore();
+  const many = lastBooking.length > 1;
+  const one = lastBooking[0] ?? draft;
+  const h = helper(one.helperId);
+  const s = svc(one.service);
+  const d = day(one.dayKey);
 
   return (
     <div className="screen confirmed">
@@ -55,14 +58,46 @@ export function Confirmed() {
             </motion.span>
           </motion.div>
           <motion.h1 className="display" style={{ marginTop: 22 }} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-            {h.first} is <i>booked</i>
+            {many ? <>{lastBooking.length} visits are <i>booked</i></> : <>{h.first} is <i>booked</i></>}
           </motion.h1>
           <motion.p className="muted" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} style={{ margin: "6px 0 0", fontSize: 15 }}>
-            Mom is in good hands {d.key === "today" ? "today" : `on ${d.label}`}.
+            {many ? `One checkout, $${lastBooking.reduce((a, c) => a + c.total, 0)} in total. Mom's week is set.` : `Mom is in good hands ${d.key === "today" ? "today" : `on ${d.label}`}.`}
           </motion.p>
 
+          {many && (
+            <motion.div className="ticket" initial={{ opacity: 0, y: 40, rotateX: 30 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 180, damping: 20 }}>
+              <div className="ticket-multi">
+                {lastBooking.map((c, i) => {
+                  const ch = helper(c.helperId);
+                  return (
+                    <motion.div key={c.id} className="tm-row" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.65 + i * 0.1 }}>
+                      <ServiceGlyph id={c.service} size={40} radius={13} />
+                      <div className="grow">
+                        <b>{svc(c.service).name}</b>
+                        <span>{day(c.dayKey).label} · {c.time.replace(":00", "")} · with {ch.first}</span>
+                      </div>
+                      <Avatar src={ch.photo} size={34} />
+                    </motion.div>
+                  );
+                })}
+              </div>
+              <div className="ticket-cut" />
+              <div className="ticket-notes">
+                {([
+                  [MessageSquareHeart, "Mom gets a text with each helper's photo"],
+                  [Users, "Anita can see every visit and split the cost"],
+                  [BellRing, "Reminders 24 hrs and 1 hr before each one"],
+                ] as const).map(([Icon, t], i) => (
+                  <motion.div key={t} className="row" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9 + i * 0.12 }}>
+                    <span className="note-ic"><Icon size={16} /></span>{t}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* ticket */}
-          <motion.div className="ticket" initial={{ opacity: 0, y: 40, rotateX: 30 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 180, damping: 20 }}>
+          {!many && <motion.div className="ticket" initial={{ opacity: 0, y: 40, rotateX: 30 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 180, damping: 20 }}>
             <div className="ticket-top">
               <div className="row" style={{ gap: 0 }}>
                 <Avatar src={h.photo} size={54} ring="#fff" />
@@ -70,12 +105,12 @@ export function Confirmed() {
               </div>
               <div style={{ textAlign: "left" }}>
                 <b>{s.name}</b>
-                <span>{h.first} with Mom{draft.weekly ? " · every week" : ""}</span>
+                <span>{h.first} with Mom{one.weekly ? " · every week" : ""}</span>
               </div>
             </div>
             <div className="ticket-grid">
               <div><span>Date</span><b>{d.label}</b></div>
-              <div><span>Time</span><b>{draft.time.replace(":00", "")}–{endTime(draft.time, draft.hours).replace(":00", "")}</b></div>
+              <div><span>Time</span><b>{one.time.replace(":00", "")}–{endTime(one.time, one.hours).replace(":00", "")}</b></div>
               <div><span>Door PIN</span><b className="mono">4 8 2 1</b></div>
             </div>
             <div className="ticket-cut" />
@@ -90,7 +125,7 @@ export function Confirmed() {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </motion.div>}
         </div>
       </div>
       <motion.div className="dock column" initial={{ y: 80 }} animate={{ y: 0 }} transition={{ delay: 0.9, type: "spring", stiffness: 220, damping: 24 }}>

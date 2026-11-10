@@ -1,40 +1,21 @@
 "use client";
 
-import { AnimatePresence, animate, motion } from "motion/react";
-import { Check, ChevronLeft, KeyRound, MessageCircle, Phone, Play, Send, ShieldAlert, Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { PEOPLE, helper } from "../data";
-import { Avatar, Btn, Rating, Tap, spring } from "../kit";
+import { AnimatePresence, motion } from "motion/react";
+import { Check, ChevronLeft, KeyRound, MessageCircle, Phone, Play, Send, Siren, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { helper } from "../data";
+import { StreetMap, useDrive } from "../map";
+import { Avatar, Btn, Rating, SosCountdown, Tap, spring } from "../kit";
 import { useStore, type LiveStage } from "../store";
 
 const STAGES = ["On the way", "Arrived", "With Mom", "Done"];
-const ROUTE = "M 40 372 C 70 330, 120 325, 150 300 S 175 240, 215 222 S 285 212, 300 176";
 
 export function Live() {
   const { live, setLive, back, go, toast } = useStore();
   const h = helper("sunita");
-  const pathRef = useRef<SVGPathElement>(null);
-  const [pt, setPt] = useState({ x: 40, y: 372, p: 0 });
-  const [mins, setMins] = useState(6);
-
-  // drive the car along the route
-  useEffect(() => {
-    const path = pathRef.current;
-    if (!path) return;
-    const len = path.getTotalLength();
-    const place = (p: number) => {
-      const q = path.getPointAtLength(len * p);
-      setPt({ x: q.x, y: q.y, p });
-    };
-    if (live === 0) {
-      place(0);
-      const a = animate(0, 0.86, { duration: 16, ease: "linear", onUpdate: (v) => { place(v); setMins(Math.max(1, Math.round(6 - v * 6))); } });
-      return () => a.stop();
-    }
-    const a = animate(pt.p, 1, { duration: 0.8, ease: "easeOut", onUpdate: place });
-    return () => a.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live]);
+  const { p, mins } = useDrive(true);
+  const [sos, setSos] = useState(false);
+  const fire = useCallback(() => { setSos(false); go("emergency"); }, [go]);
 
   const next = () => setLive(Math.min(3, live + 1) as LiveStage);
 
@@ -42,63 +23,9 @@ export function Live() {
     <div className="screen live-screen">
       {/* ---------- map ---------- */}
       <div className="map">
-        <motion.svg viewBox="0 -40 390 470" preserveAspectRatio="xMidYMid slice" initial={{ scale: 1.15 }} animate={{ scale: 1 }} transition={{ duration: 1.4, ease: [0.2, 0.8, 0.2, 1] }}>
-          <defs>
-            <linearGradient id="route" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0" stopColor="#FF8A4C" />
-              <stop offset="1" stopColor="#FF4F7B" />
-            </linearGradient>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" /></filter>
-            <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="var(--map-dot)" /></pattern>
-          </defs>
-          <rect y="-40" width="390" height="470" fill="var(--map-bg)" />
-          <rect y="-40" width="390" height="470" fill="url(#dots)" />
-          {/* water */}
-          <path d="M 0 -40 L 150 -40 C 120 20, 70 60, 0 80 Z" fill="var(--map-water)" />
-          <text x="16" y="18" className="map-label water">Flushing Bay</text>
-          {/* blocks */}
-          {Array.from({ length: 8 }).map((_, rr) => { const r = rr - 2; return (
-            Array.from({ length: 5 }).map((_, c) => {
-              const x = 14 + c * 78, y = 100 + r * 62;
-              if ((r === 2 && c === 1) || (r === 3 && c === 1)) return null;
-              if (y < 70 && c === 0) return null;
-              return <rect key={`${r}-${c}`} x={x} y={y} width="64" height="48" rx="7" fill="var(--map-block)" />;
-            })); })}
-          {/* park */}
-          <rect x="92" y="224" width="64" height="110" rx="10" fill="var(--map-park)" />
-          {[[108, 244], [130, 262], [112, 290], [138, 306], [124, 318]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="6" fill="var(--map-tree)" />)}
-          <text x="98" y="282" className="map-label park">Travers</text>
-          <text x="104" y="294" className="map-label park">Park</text>
-          {/* avenues */}
-          <path d="M 0 210 L 390 196" stroke="var(--map-ave)" strokeWidth="11" />
-          <path d="M 236 -40 L 254 430" stroke="var(--map-road)" strokeWidth="8" />
-          <path d="M 0 344 L 390 330" stroke="var(--map-road)" strokeWidth="7" />
-          <text x="10" y="191" className="map-label">Roosevelt Ave</text>
-          <text x="262" y="430" className="map-label" transform="rotate(87 262 430)">74th St</text>
-          {/* subway */}
-          <g transform="translate(200 202)"><circle r="8" fill="#7B5CF0" /><text y="3.5" textAnchor="middle" className="map-sub">7</text></g>
-
-          {/* route */}
-          <path d={ROUTE} stroke="url(#route)" strokeWidth="10" fill="none" strokeLinecap="round" opacity=".35" filter="url(#glow)" />
-          <path d={ROUTE} stroke="var(--map-route-bg)" strokeWidth="6" fill="none" strokeLinecap="round" strokeDasharray="2 9" />
-          <path ref={pathRef} d={ROUTE} stroke="url(#route)" strokeWidth="6" fill="none" strokeLinecap="round" pathLength={1} strokeDasharray={`${pt.p} 1`} />
-
-          {/* mom's home */}
-          <g transform="translate(300 176)">
-            <motion.circle r="28" fill="#FF4F7B" opacity=".18" animate={{ r: [22, 34, 22], opacity: [0.25, 0, 0.25] }} transition={{ duration: 2.4, repeat: Infinity }} />
-            <path d="M -18 -20 a 18 18 0 1 1 36 0 c 0 12 -18 30 -18 30 c 0 0 -18 -18 -18 -30 z" transform="translate(0 -10)" fill="#fff" stroke="#fff" />
-            <clipPath id="momclip"><circle cx="0" cy="-31" r="15" /></clipPath>
-            <image href={PEOPLE.mom.photo} x="-15" y="-46" width="30" height="30" clipPath="url(#momclip)" preserveAspectRatio="xMidYMid slice" />
-          </g>
-
-          {/* car */}
-          <g style={{ transform: `translate(${pt.x}px, ${pt.y}px)` }}>
-            <circle r="20" fill="#FF4F7B" opacity=".2" />
-            <circle r="13" fill="#fff" />
-            <circle r="10" fill="url(#route)" />
-            <path d="M -4.5 1 l 1.5 -4 h 6 l 1.5 4 v 3 h -9 z" fill="#fff" />
-          </g>
-        </motion.svg>
+        <motion.div className="map-zoom" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 1.4, ease: [0.2, 0.8, 0.2, 1] }}>
+          <StreetMap progress={p} fit pad={{ top: 112, right: 34, bottom: 52, left: 34 }} className="attr-high" />
+        </motion.div>
 
         <div className="map-top">
           <Tap className="icon-btn glass" onClick={back} aria-label="Back"><ChevronLeft size={22} /></Tap>
@@ -110,7 +37,7 @@ export function Live() {
               {live === 3 && <><Sparkles size={16} className="ok" /> Visit complete</>}
             </motion.div>
           </AnimatePresence>
-          <Tap className="icon-btn sos" onClick={() => go("emergency")} aria-label="Emergency"><ShieldAlert size={20} /></Tap>
+          <span style={{ width: 42 }} />
         </div>
       </div>
 
@@ -137,6 +64,12 @@ export function Live() {
           <Tap className="round-btn" onClick={() => toast(`Chat with ${h.first}`, "info")} aria-label="Chat"><MessageCircle size={19} /></Tap>
         </div>
 
+        {/* always in view, never behind a scroll */}
+        <Tap className="emergency-btn" onClick={() => setSos(true)}>
+          <Siren size={19} /> Emergency
+          <span>911 · family · Kinly nurse</span>
+        </Tap>
+
         <div className="live-scroll">
           <AnimatePresence mode="wait">
             <motion.div key={live} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.25 }}>
@@ -154,6 +87,8 @@ export function Live() {
           </Tap>
         )}
       </motion.div>
+
+      <SosCountdown open={sos} onCancel={() => setSos(false)} onDone={fire} sub="We'll call 911 to Mom's address, alert Sunita and Anita, and connect a Kinly nurse." />
     </div>
   );
 }
@@ -170,7 +105,7 @@ function StageOnTheWay() {
       </div>
       <div className="tl">
         <div className="tl-row on"><i /> <span><b>Booked</b> · Mon 6:12 PM</span></div>
-        <div className="tl-row on"><i /> <span><b>Left home</b> · 1:52 PM · 1.2 mi away</span></div>
+        <div className="tl-row on"><i /> <span><b>Left home</b> · 1:52 PM · 0.8 mi away</span></div>
         <div className="tl-row"><i /> <span>Checks in with the PIN</span></div>
         <div className="tl-row"><i /> <span>Chai, walk and rummy with Mom</span></div>
       </div>

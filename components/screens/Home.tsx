@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Bell, ChevronDown, ChevronRight, MapPin, Plus, Search, ShieldCheck, Sparkles, UserPlus } from "lucide-react";
+import { Bell, Check, ChevronDown, ChevronRight, MapPin, Plus, Repeat, Search, ShieldCheck, Sparkles, UserPlus } from "lucide-react";
 import { useState } from "react";
-import { HELPERS, PEOPLE, SERVICES, helper, svc } from "../data";
+import { HELPERS, MOMS_USUAL, PEOPLE, SERVICES, cardRate, day, helper, priceFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
+import { Avatar, CartButton, KinlySafe, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
 import { useStore } from "../store";
 
 const LIVE_COPY = [
@@ -16,7 +16,7 @@ const LIVE_COPY = [
 ];
 
 export function Home() {
-  const { go, live, setExplore, setDraft, toast } = useStore();
+  const { go, live, setExplore, setDraft, toast, showSafe } = useStore();
   const [careSheet, setCareSheet] = useState(false);
   const L = LIVE_COPY[live];
   const sunita = helper("sunita");
@@ -40,13 +40,16 @@ export function Home() {
             <Avatar src={PEOPLE.rohan.photo} size={44} />
             <div>
               <div className="eyebrow">Thursday, Nov 12</div>
-              <div className="hello">Good afternoon, Rohan</div>
+              <h1 className="hello">Good afternoon, <i>Rohan</i></h1>
             </div>
           </div>
-          <Tap className="icon-btn raised" onClick={() => toast("Mom took her 1 PM meds", "check")} aria-label="Notifications">
-            <Bell size={20} />
-            <span className="ping" />
-          </Tap>
+          <div className="row" style={{ gap: 8 }}>
+            <CartButton />
+            <Tap className="icon-btn raised" onClick={() => toast("Mom took her 1 PM meds", "check")} aria-label="Notifications">
+              <Bell size={20} />
+              <span className="ping" />
+            </Tap>
+          </div>
         </Rise>
 
         {/* who we're caring for */}
@@ -99,6 +102,9 @@ export function Home() {
           </Tap>
         </Rise>
 
+        {/* one-tap reorder */}
+        <Rise><MomsUsual /></Rise>
+
         {/* categories */}
         <Rise>
           <div className="cat-grid">
@@ -106,7 +112,7 @@ export function Home() {
               <Tap key={s.id} className="cat" onClick={() => openService(s.id)} style={{ ["--hue" as string]: s.hue, ["--tint" as string]: s.tint }}>
                 <ServiceGlyph id={s.id} size={40} radius={13} />
                 <b>{s.name}</b>
-                <span>from ${s.from}/{s.unit}</span>
+                <span>{s.unit === "visit" ? `$${s.from}/visit` : `from $${s.from}/hr`}</span>
               </Tap>
             ))}
           </div>
@@ -170,9 +176,10 @@ export function Home() {
                   <Rating value={h.rating} />
                 </div>
                 <span className="muted small">{h.role}</span>
+                <span style={{ marginTop: 6 }}><KinlySafe /></span>
                 <div className="row between" style={{ marginTop: 8 }}>
                   <span className="small row muted" style={{ gap: 3 }}><MapPin size={12} />{h.miles} mi</span>
-                  <span className="price-tag">${h.rate}<small>/hr</small></span>
+                  <span className="price-tag">${cardRate(h).rate}<small>/{cardRate(h).unit}</small></span>
                 </div>
               </div>
             </Tap>
@@ -205,13 +212,14 @@ export function Home() {
           </div>
         </div>
 
-        <div className="trust">
+        <Tap className="trust" onClick={showSafe}>
           <ShieldCheck size={22} />
           <div>
-            <b>Every helper is vetted</b>
-            <span>Background check, ID, references and a $2M insurance policy on every visit.</span>
+            <b>Every helper is Kinly Safe</b>
+            <span>Background check, ID verification, CPR training and insurance on every visit.</span>
           </div>
-        </div>
+          <ChevronRight size={18} style={{ alignSelf: "center", flexShrink: 0 }} />
+        </Tap>
         <div style={{ height: 110 }} />
       </div>
 
@@ -222,16 +230,55 @@ export function Home() {
             <div className="grow" style={{ textAlign: "left" }}><b>Mom · Kamala, 78</b><span>Jackson Heights, Queens</span></div>
             <span className="radio on" />
           </Tap>
-          <Tap className="care-opt" onClick={() => { setCareSheet(false); toast("Invite sent to Dad's profile", "info"); }}>
-            <span className="care-add"><Plus size={22} /></span>
-            <div className="grow" style={{ textAlign: "left" }}><b>Add Dad or another relative</b><span>Separate profile, shared with siblings</span></div>
-          </Tap>
-          <div className="row" style={{ gap: 10, padding: "8px 4px 4px" }}>
-            <Avatar src={PEOPLE.anita.photo} size={28} />
-            <span className="small muted">Your sister <b>Anita</b> can also see and book visits for Mom.</span>
-          </div>
         </div>
       </Sheet>
+    </div>
+  );
+}
+
+/** "Mom's usual": the weekly check-in and her medicine refills, rebooked together in one tap. */
+function MomsUsual() {
+  const { visits, addVisit, toast, go } = useStore();
+  const items = MOMS_USUAL.map((u) => ({ ...u, h: helper(u.helperId), s: svc(u.service), total: priceFor(helper(u.helperId), svc(u.service), u.hours).total }));
+  const total = items.reduce((a, x) => a + x.total, 0);
+  const booked = visits.some((v) => v.id === "usual-0");
+
+  const book = () => {
+    items.forEach((x, i) => addVisit({
+      id: `usual-${i}`, helperId: x.helperId, service: x.service, dayKey: x.dayKey, dateLabel: day(x.dayKey).label,
+      time: x.time, hours: x.hours, status: "upcoming", weekly: true, total: x.total,
+    }));
+    toast(`Mom's usual is booked for ${day(MOMS_USUAL[0].dayKey).label}`, "check");
+  };
+
+  return (
+    <div className={`usual ${booked ? "done" : ""}`}>
+      <div className="row between">
+        <div>
+          <div className="eyebrow">One tap</div>
+          <b className="usual-title">Mom&apos;s usual</b>
+        </div>
+        <span className="usual-when"><Repeat size={12} /> Every {day(MOMS_USUAL[0].dayKey).dow}</span>
+      </div>
+      <div className="usual-items">
+        {items.map((x) => (
+          <div key={x.what} className="usual-item">
+            <ServiceGlyph id={x.service} size={34} radius={11} />
+            <div className="grow">
+              <b>{x.what}</b>
+              <span>{x.h.first} · {x.time.replace(":00", "")}</span>
+            </div>
+            <Avatar src={x.h.photo} size={30} />
+          </div>
+        ))}
+      </div>
+      {booked ? (
+        <Tap className="usual-btn done" onClick={() => go("visits")}>
+          <Check size={17} strokeWidth={3} /> Booked for {day(MOMS_USUAL[0].dayKey).label} · see Visits
+        </Tap>
+      ) : (
+        <Tap className="usual-btn" onClick={book}>Book both · ${total}</Tap>
+      )}
     </div>
   );
 }

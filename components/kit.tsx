@@ -1,8 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useTransform, animate, type PanInfo } from "motion/react";
-import { BadgeCheck, ChevronLeft, ChevronsRight, Star, Check } from "lucide-react";
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { BadgeCheck, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useStore } from "./store";
 
 export const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
@@ -175,4 +175,83 @@ export function Rise({ children, className, style, onClick }: { children: ReactN
 
 export function Money({ v, cents }: { v: number; cents?: boolean }) {
   return <>${cents ? v.toFixed(2) : Math.round(v).toLocaleString("en-US")}</>;
+}
+
+/* ---------- Kinly Safe ---------- */
+
+/** Trust badge. A span, not a button, so it can sit inside tappable cards. */
+export function KinlySafe({ big }: { big?: boolean }) {
+  const { showSafe } = useStore();
+  return (
+    <motion.span
+      role="button" tabIndex={0} className={`ksafe ${big ? "big" : ""}`} whileTap={{ scale: 0.94 }}
+      onClick={(e) => { e.stopPropagation(); showSafe(); }}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); showSafe(); } }}
+    >
+      <ShieldCheck size={big ? 15 : 13} strokeWidth={2.4} /> Kinly Safe
+    </motion.span>
+  );
+}
+
+/* ---------- cart ---------- */
+
+export function CartButton() {
+  const { cart, tab } = useStore();
+  return (
+    <Tap className="icon-btn raised" onClick={() => tab("cart")} aria-label={`Cart, ${cart.length} visits`}>
+      <ShoppingCart size={20} />
+      <CountBadge n={cart.length} />
+    </Tap>
+  );
+}
+
+export function CountBadge({ n }: { n: number }) {
+  return (
+    <AnimatePresence>
+      {n > 0 && (
+        <motion.span key={n} className="count-badge" initial={{ scale: 0.3 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 600, damping: 18 }}>
+          {n}
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ---------- emergency countdown ---------- */
+
+/** One tap starts it, five seconds to cancel. No press-and-hold: in a real emergency there may be no time or strength for it. */
+export function SosCountdown({ open, onCancel, onDone, big, sub }: { open: boolean; onCancel: () => void; onDone: () => void; big?: boolean; sub: string }) {
+  const SECS = 5;
+  const [n, setN] = useState(SECS);
+  useEffect(() => {
+    if (!open) return;
+    setN(SECS);
+    const id = setInterval(() => setN((x) => x - 1), 1000);
+    return () => clearInterval(id);
+  }, [open]);
+  useEffect(() => {
+    if (open && n <= 0) onDone();
+  }, [open, n, onDone]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className={`sos-count ${big ? "big" : ""}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <div className="sos-count-ring">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" className="bg" />
+              <motion.circle cx="60" cy="60" r="54" className="fg" pathLength={1} initial={{ pathLength: 1 }} animate={{ pathLength: 0 }} transition={{ duration: SECS, ease: "linear" }} />
+            </svg>
+            <AnimatePresence mode="popLayout">
+              <motion.b key={n} initial={{ scale: 1.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.7, opacity: 0 }}>{Math.max(n, 0)}</motion.b>
+            </AnimatePresence>
+          </div>
+          <h2>Calling for help</h2>
+          <p>{sub}</p>
+          <button className="sos-count-now" onClick={onDone}>Call now</button>
+          <button className="sos-count-cancel" onClick={onCancel}>Cancel</button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }

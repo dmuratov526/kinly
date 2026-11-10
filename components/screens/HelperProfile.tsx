@@ -3,13 +3,13 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { Award, Car, ChevronLeft, Clock, Heart, Languages, MessageCircle, Pause, Play, Repeat, Share, ShieldCheck, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { DAYS, REVIEWS, TIMES, helper, isFree, svc } from "../data";
+import { DAYS, REVIEWS, TIMES, helper, isFree, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Btn, Rating, Tap, Verified } from "../kit";
+import { Avatar, Btn, KinlySafe, Rating, Tap, Verified } from "../kit";
 import { useStore } from "../store";
 
 export function HelperProfile() {
-  const { draft, setDraft, go, back, favs, toggleFav, toast } = useStore();
+  const { draft, setDraft, go, back, favs, toggleFav, toast, showSafe } = useStore();
   const h = helper(draft.helperId);
   const s = svc(draft.service);
   const scroller = useRef<HTMLDivElement>(null);
@@ -57,6 +57,7 @@ export function HelperProfile() {
             <h1 className="profile-name">{h.name} <Verified size={22} /></h1>
             <div className="muted">{h.role} · {h.years} years · {h.miles} mi from Mom</div>
             <div className="row center" style={{ gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+              <KinlySafe big />
               {h.badges.map((b) => <span key={b} className={`tag ${b === "Top Helper" ? "gold" : ""}`}>{b}</span>)}
             </div>
           </div>
@@ -95,7 +96,7 @@ export function HelperProfile() {
 
           <div className="facts">
             <div><Languages size={18} /><span>Speaks <b>{h.langs.join(", ")}</b></span></div>
-            <div><ShieldCheck size={18} /><span><b>Background checked</b> · ID verified · insured</span></div>
+            <Tap className="fact-tap" onClick={showSafe}><ShieldCheck size={18} /><span className="grow"><b>Kinly Safe</b> · background check, ID, CPR, insurance</span><span className="fact-more">What&apos;s this?</span></Tap>
             {h.cpr && <div><Award size={18} /><span><b>CPR &amp; First Aid</b> certified, 2026</span></div>}
             {h.badges.includes("Has a car") && <div><Car size={18} /><span>Drives a <b>Honda CR-V</b>, room for a walker</span></div>}
             <div><Repeat size={18} /><span><b>{h.repeat}%</b> of families book {h.first} again</span></div>
@@ -111,7 +112,7 @@ export function HelperProfile() {
                   <Tap key={id} className={`svc-row ${on ? "on" : ""}`} onClick={() => setDraft({ service: id, tasks: x.tasks })} style={{ ["--hue" as string]: x.hue }}>
                     <ServiceGlyph id={id} size={38} radius={12} />
                     <span className="grow">{x.name}</span>
-                    <b>${x.unit === "visit" ? x.from : h.rate}<small>/{x.unit}</small></b>
+                    <b>${rateFor(h, x)}<small>/{x.unit}</small></b>
                   </Tap>
                 );
               })}
@@ -135,6 +136,12 @@ export function HelperProfile() {
             </div>
           </div>
 
+          <Tap className="chat-row" onClick={() => toast(`Message sent to ${h.first}`, "check")}>
+            <MessageCircle size={20} />
+            <span className="grow">Ask {h.first} a question first</span>
+            <span className="muted small">Free</span>
+          </Tap>
+
           <div className="block">
             <div className="row between">
               <h3>What families say</h3>
@@ -157,11 +164,6 @@ export function HelperProfile() {
             </div>
           </div>
 
-          <Tap className="chat-row" onClick={() => toast(`Message sent to ${h.first}`, "check")}>
-            <MessageCircle size={20} />
-            <span className="grow">Ask {h.first} a question first</span>
-            <span className="muted small">Free</span>
-          </Tap>
           <div style={{ height: 120 }} />
         </div>
       </div>
@@ -169,7 +171,7 @@ export function HelperProfile() {
       <div className="dock">
         <div>
           <div className="small muted">{s.name}</div>
-          <b className="dock-price">${s.unit === "visit" ? s.from : h.rate}<small>/{s.unit}</small></b>
+          <b className="dock-price">${rateFor(h, s)}<small>/{s.unit}</small></b>
         </div>
         <Btn kind="brand" onClick={() => go("book")} style={{ flex: 1 }}>Book {h.first}</Btn>
       </div>
