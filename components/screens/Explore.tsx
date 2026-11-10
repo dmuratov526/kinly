@@ -5,7 +5,7 @@ import { ArrowUpDown, CalendarClock, Heart, MapPin, Search, SlidersHorizontal, W
 import { useEffect, useRef, useState } from "react";
 import { DAYS, HELPERS, SERVICES, TIMES, cardRate, day, isFree, svc, type Helper, type ServiceId } from "../data";
 import { SERVICE_ICON } from "../icons";
-import { Avatar, Btn, CartButton, KinlySafe, Rating, Sheet, Tap, Verified, softSpring } from "../kit";
+import { Avatar, Btn, CartButton, KinlySafe, Rating, ServiceScope, Sheet, Tap, Verified, softSpring } from "../kit";
 import { NO_FILTERS, useStore, type Filters } from "../store";
 import { FilterSheet, activeCount, passes } from "./FilterSheet";
 
@@ -60,7 +60,7 @@ export function Explore() {
   const matchMe = () => {
     const best = list[0];
     if (!best) return;
-    toast(`${best.first} is a ${best.match}% match for Mom`, "heart");
+    toast(`${best.first} is a ${best.match}% match for Kamala`, "heart");
     open(best);
   };
 
@@ -117,8 +117,9 @@ export function Explore() {
       </div>
 
       <div className="pad">
+        {explore.service && <div style={{ marginTop: 10 }}><ServiceScope key={explore.service} id={explore.service} /></div>}
         <div className="row between results-meta">
-          <span><b>{list.length}</b> near Mom</span>
+          <span><b>{list.length}</b> near Kamala</span>
           <div className="row" style={{ gap: 6 }}>
             {list.length > 0 && <Tap className="match-btn" onClick={matchMe}><Wand2 size={14} /> Match me</Tap>}
             <Tap className="sort-btn" onClick={() => setSort((sort + 1) % SORTS.length)}><ArrowUpDown size={14} /> {SORTS[sort].name}</Tap>
@@ -147,7 +148,7 @@ export function Explore() {
 
       <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} f={f} setF={setF} base={base} service={explore.service} favs={favs} />
 
-      <Sheet open={whenOpen} onClose={() => setWhenOpen(false)} title="When does Mom need help?">
+      <Sheet open={whenOpen} onClose={() => setWhenOpen(false)} title="When does Kamala need help?">
         <div className="day-strip" style={{ margin: "0 -20px", padding: "0 20px" }}>
           {DAYS.map((d) => (
             <Tap key={d.key} className={`day-pill ${wDay === d.key ? "on" : ""}`} onClick={() => setWDay(d.key)}>

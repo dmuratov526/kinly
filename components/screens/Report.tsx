@@ -7,7 +7,7 @@ import { PEOPLE, helper } from "../data";
 import { Avatar, Btn, Tap } from "../kit";
 import { useStore } from "../store";
 
-const TAGS = ["Kind and patient", "Great updates", "On time", "Mom loved her"];
+const TAGS = ["Kind and patient", "Great updates", "On time", "Kamala loved her"];
 
 export function Report() {
   const { back, toast, tab } = useStore();
@@ -35,7 +35,7 @@ export function Report() {
             <div className="row" style={{ gap: 8 }}>
               <Avatar src={h.photo} size={28} ring="#fff" />
               <Avatar src={PEOPLE.mom.photo} size={28} ring="#fff" style={{ marginLeft: -12 }} />
-              <span className="small" style={{ color: "rgba(255,255,255,.85)" }}>Sunita with Mom · 2:01–5:04 PM</span>
+              <span className="small" style={{ color: "rgba(255,255,255,.85)" }}>Sunita with Kamala · 2:01–5:04 PM</span>
             </div>
           </div>
         </div>

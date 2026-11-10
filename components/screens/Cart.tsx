@@ -29,7 +29,7 @@ export function Cart() {
           <h1 className="display">Your <i>cart</i></h1>
           {cart.length > 0 && <span className="pill-stat"><b>{cart.length}</b> visit{cart.length === 1 ? "" : "s"}</span>}
         </div>
-        <p className="muted cart-sub">Stack visits for Mom, then book them all at once.</p>
+        <p className="muted cart-sub">Stack visits for Kamala, then book them all at once.</p>
 
         {cart.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="empty">

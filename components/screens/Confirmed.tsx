@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { BellRing, CalendarPlus, Check, MessageSquareHeart, Users } from "lucide-react";
+import { BellRing, CalendarPlus, Check, MessageCircle, MessageSquareHeart, Users } from "lucide-react";
 import { useMemo } from "react";
 import { PEOPLE, day, endTime, helper, svc } from "../data";
 import { ServiceGlyph } from "../icons";
@@ -39,7 +39,7 @@ function Confetti() {
 }
 
 export function Confirmed() {
-  const { draft, tab, toast, lastBooking } = useStore();
+  const { draft, tab, toast, lastBooking, openChat } = useStore();
   const many = lastBooking.length > 1;
   const one = lastBooking[0] ?? draft;
   const h = helper(one.helperId);
@@ -61,8 +61,14 @@ export function Confirmed() {
             {many ? <>{lastBooking.length} visits are <i>booked</i></> : <>{h.first} is <i>booked</i></>}
           </motion.h1>
           <motion.p className="muted" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} style={{ margin: "6px 0 0", fontSize: 15 }}>
-            {many ? `One checkout, $${lastBooking.reduce((a, c) => a + c.total, 0)} in total. Mom's week is set.` : `Mom is in good hands ${d.key === "today" ? "today" : `on ${d.label}`}.`}
+            {many ? `One checkout, $${lastBooking.reduce((a, c) => a + c.total, 0)} in total. Kamala's week is set.` : `Kamala is in good hands ${d.key === "today" ? "today" : `on ${d.label}`}.`}
           </motion.p>
+
+          <motion.div className="notified" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.55 }}>
+            <Avatar src={PEOPLE.mom.photo} size={30} />
+            <span>Kamala has also been notified{many ? " about every visit" : ` that ${h.first} is coming`}</span>
+            <Check size={16} strokeWidth={3} className="ok" />
+          </motion.div>
 
           {many && (
             <motion.div className="ticket" initial={{ opacity: 0, y: 40, rotateX: 30 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ delay: 0.5, type: "spring", stiffness: 180, damping: 20 }}>
@@ -84,7 +90,7 @@ export function Confirmed() {
               <div className="ticket-cut" />
               <div className="ticket-notes">
                 {([
-                  [MessageSquareHeart, "Mom gets a text with each helper's photo"],
+                  [MessageSquareHeart, "Each helper's photo is on Kamala's phone"],
                   [Users, "Anita can see every visit too"],
                   [BellRing, "Reminders 24 hrs and 1 hr before each one"],
                 ] as const).map(([Icon, t], i) => (
@@ -105,7 +111,7 @@ export function Confirmed() {
               </div>
               <div style={{ textAlign: "left" }}>
                 <b>{s.name}</b>
-                <span>{h.first} with Mom{one.weekly ? " · every week" : ""}</span>
+                <span>{h.first} with Kamala{one.weekly ? " · every week" : ""}</span>
               </div>
             </div>
             <div className="ticket-grid">
@@ -116,7 +122,7 @@ export function Confirmed() {
             <div className="ticket-cut" />
             <div className="ticket-notes">
               {([
-                [MessageSquareHeart, `We texted Mom ${h.first}'s photo and arrival time`],
+                [MessageSquareHeart, `${h.first}'s photo and arrival time are on Kamala's phone`],
                 [Users, "Anita can see this visit too"],
                 [BellRing, "Reminders 24 hrs and 1 hr before"],
               ] as const).map(([Icon, t], i) => (
@@ -131,8 +137,8 @@ export function Confirmed() {
       <motion.div className="dock column" initial={{ y: 80 }} animate={{ y: 0 }} transition={{ delay: 0.9, type: "spring", stiffness: 220, damping: 24 }}>
         <Btn kind="primary" style={{ width: "100%" }} onClick={() => tab("visits")}>See it in Visits</Btn>
         <div className="row" style={{ gap: 10, width: "100%" }}>
+          <Btn kind="soft" style={{ flex: 1.4 }} onClick={() => openChat(one.helperId)}><MessageCircle size={18} /> Chat with {h.first}</Btn>
           <Btn kind="soft" style={{ flex: 1 }} onClick={() => toast("Added to Google Calendar", "check")}><CalendarPlus size={18} /> Calendar</Btn>
-          <Tap className="btn soft" style={{ flex: 1 }} onClick={() => tab("home")}>Done</Tap>
         </div>
       </motion.div>
     </div>

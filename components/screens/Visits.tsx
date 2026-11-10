@@ -9,7 +9,7 @@ import { Avatar, Btn, Sheet, Tap, softSpring } from "../kit";
 import { useStore } from "../store";
 
 export function Visits() {
-  const { visits, go, live, setDraft, toast, cancelVisit } = useStore();
+  const { visits, go, live, setDraft, toast, cancelVisit, openChat } = useStore();
   const [tab, setTab] = useState<"up" | "past">("up");
   const [cancelling, setCancelling] = useState<Visit | null>(null);
   const cancel = (all: boolean) => {
@@ -17,7 +17,7 @@ export function Visits() {
     const h = helper(cancelling.helperId);
     cancelVisit(cancelling.id);
     setCancelling(null);
-    toast(all ? `Weekly visits with ${h.first} cancelled` : `Cancelled · ${h.first} and Mom are notified`, "check");
+    toast(all ? `Weekly visits with ${h.first} cancelled` : `Cancelled · ${h.first} and Kamala are notified`, "check");
   };
 
   const liveVisit = visits.find((v) => v.status === "live");
@@ -69,7 +69,7 @@ export function Visits() {
                     <VisitBody v={v} />
                     <div className="visit-actions">
                       <span onClick={(e) => { e.stopPropagation(); toast("Reschedule options", "info"); }}>Reschedule</span>
-                      <span onClick={(e) => { e.stopPropagation(); toast(`Message sent to ${helper(v.helperId).first}`, "check"); }}>Message</span>
+                      <span onClick={(e) => { e.stopPropagation(); openChat(v.helperId); }}>Message</span>
                       <span className="danger" onClick={(e) => { e.stopPropagation(); setCancelling(v); }}>Cancel</span>
                     </div>
                   </Tap>
@@ -119,7 +119,7 @@ export function Visits() {
                 <span>{cancelling.dateLabel} · {cancelling.time.replace(":00", "")}</span>
               </div>
             </div>
-            <p className="cancel-note">Free cancellation: it&apos;s more than 24 hours away, so you won&apos;t be charged. We&apos;ll let {helper(cancelling.helperId).first} and Mom know.</p>
+            <p className="cancel-note">Free cancellation: it&apos;s more than 24 hours away, so you won&apos;t be charged. We&apos;ll let {helper(cancelling.helperId).first} and Kamala know.</p>
             {cancelling.weekly ? (
               <>
                 <Btn kind="danger" style={{ width: "100%" }} onClick={() => cancel(false)}>Cancel just this visit</Btn>

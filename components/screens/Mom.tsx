@@ -3,17 +3,25 @@
 /* Mom's phone: her own app (Kinly for Parents), separate from Rohan's. No tab bar, nothing covering it. */
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ChevronLeft, Navigation, Phone, Pill, Sun } from "lucide-react";
+import { Check, ChevronLeft, Coffee, Globe, Navigation, Phone, Pill, ShoppingBasket, Sparkles, Stethoscope, Sun, type LucideIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { PEOPLE, helper } from "../data";
+import { PEOPLE, helper, type ServiceId } from "../data";
 import { StreetMap, useDrive } from "../map";
 import { Avatar, HelpAsk, Tap } from "../kit";
 import { useStore } from "../store";
 
+const ASK: { id: string; label: string; service: ServiceId; helperId: string; Icon: LucideIcon; hue: string; tint: string }[] = [
+  { id: "ask-company", label: "Company", service: "companion", helperId: "sunita", Icon: Coffee, hue: "#E8577A", tint: "#FDE7EC" },
+  { id: "ask-groceries", label: "Groceries", service: "errands", helperId: "mei", Icon: ShoppingBasket, hue: "#C97E12", tint: "#FDF1DC" },
+  { id: "ask-doctor", label: "Ride to doctor", service: "escort", helperId: "denise", Icon: Stethoscope, hue: "#7B5CF0", tint: "#EEE9FE" },
+  { id: "ask-house", label: "House help", service: "home", helperId: "maria", Icon: Sparkles, hue: "#22A57A", tint: "#DFF5EC" },
+];
+
 export function Mom() {
-  const { go, toast, live } = useStore();
+  const { go, toast, live, showLang, addRequest, requests } = useStore();
   const h = helper("sunita");
   const { p, mins } = useDrive(true);
+  const [asking, setAsking] = useState<(typeof ASK)[number] | null>(null);
   const [pill, setPill] = useState(false);
   const [sos, setSos] = useState(false);
   const fire = useCallback(() => { setSos(false); go("emergency"); }, [go]);
@@ -24,7 +32,10 @@ export function Mom() {
       <div className="scroll grow-1" style={{ paddingTop: "var(--safe)" }}>
         <div className="pad stack-18" style={{ paddingTop: 14 }}>
           <div>
-            <div className="mom-date"><Sun size={20} /> Thursday · 58° and sunny</div>
+            <div className="row between">
+              <div className="mom-date"><Sun size={20} /> Thursday · 58° and sunny</div>
+              <Tap className="mom-lang" onClick={showLang} aria-label="Language"><Globe size={20} /> EN</Tap>
+            </div>
             <h1 className="mom-hello">Good afternoon,<br /><i>Kamala</i></h1>
           </div>
 
@@ -59,6 +70,23 @@ export function Mom() {
             </div>
           </Tap>
 
+          {/* she can ask for a visit herself; Rohan approves and pays */}
+          <div>
+            <h2 className="mom-h2">Ask for a visit</h2>
+            <div className="mom-ask">
+              {ASK.map((a) => {
+                const sent = requests.some((r) => r.id === a.id);
+                return (
+                  <Tap key={a.id} className={`mom-ask-tile ${sent ? "sent" : ""}`} onClick={() => (sent ? toast("Rohan has your request", "check") : setAsking(a))}>
+                    <span className="mom-ask-ic" style={{ background: a.tint, color: a.hue }}>{sent ? <Check size={30} strokeWidth={3} /> : <a.Icon size={30} />}</span>
+                    <b>{a.label}</b>
+                    {sent && <span>Sent to Rohan</span>}
+                  </Tap>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="mom-calls">
             {[
               { name: "Rohan", photo: PEOPLE.rohan.photo, sub: "Your son" },
@@ -84,6 +112,25 @@ export function Mom() {
           <div style={{ height: 40 }} />
         </div>
       </div>
+
+      <AnimatePresence>
+        {asking && (
+          <motion.div className="help-ask" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAsking(null)}>
+            <motion.div className="help-ask-card" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ fontSize: 38 }}>{asking.label}</h2>
+              <p>When would you like it?</p>
+              {["Today", "Tomorrow", "This week"].map((w) => (
+                <button key={w} className="help-no" onClick={() => {
+                  addRequest({ id: asking.id, service: asking.service, what: asking.label, when: w, helperId: asking.helperId });
+                  setAsking(null);
+                  toast("Sent to Rohan. He'll confirm soon", "check");
+                }}>{w}</button>
+              ))}
+              <span className="help-note">Rohan will see it and book it for you.</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <HelpAsk open={sos} onYes={fire} onNo={() => { setSos(false); toast("Glad you're okay", "heart"); }} onSilent={silent} />
     </div>
@@ -124,7 +171,7 @@ export function MomMap() {
 export function Emergency() {
   const { back, toast } = useStore();
   const h = helper("sunita");
-  const steps = ["911 called from Sunita's phone", "Rohan and Anita alerted", "Kinly nurse on the line", "Live location sent to responders", "Mom's meds and allergies shared"];
+  const steps = ["911 called from Sunita's phone", "Rohan and Anita alerted", "Kinly nurse on the line", "Live location sent to responders", "Kamala's meds and allergies shared"];
   return (
     <div className="screen emergency">
       <motion.div className="sos-pulse" animate={{ scale: [1, 1.6], opacity: [0.5, 0] }} transition={{ duration: 1.6, repeat: Infinity }} />
@@ -132,7 +179,7 @@ export function Emergency() {
       <div className="pad stack-18" style={{ paddingTop: 70, position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
         <span className="eyebrow light">Emergency · 3:22 PM</span>
         <h1 className="display light" style={{ fontSize: 38 }}>Help is <i>on the way</i></h1>
-        <p style={{ margin: 0, fontSize: 16, opacity: 0.9, lineHeight: 1.45 }}>An alert went out from Mom&apos;s home at 37-12 82nd St. Stay on the line with the Kinly nurse.</p>
+        <p style={{ margin: 0, fontSize: 16, opacity: 0.9, lineHeight: 1.45 }}>An alert went out from Kamala&apos;s home at 37-12 82nd St. Stay on the line with the Kinly nurse.</p>
         <div className="sos-list">
           {steps.map((s, i) => (
             <motion.div key={s} className="row" initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.45 }}>

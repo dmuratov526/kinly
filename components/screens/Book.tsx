@@ -5,7 +5,7 @@ import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart } from "lucide-rea
 import { useState } from "react";
 import { DAYS, FEE, TIMES, cartItem, day, endTime, helper, isFree, priceFor, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Rating, SlideToConfirm, Tap, TopBar, Verified, spring } from "../kit";
+import { Avatar, Rating, ServiceScope, Tap, TopBar, Verified, spring } from "../kit";
 import { useStore } from "../store";
 
 export function Book() {
@@ -37,7 +37,7 @@ export function Book() {
 
   return (
     <div className="screen">
-      <TopBar title={`Book ${h.first}`} sub={`${s.name} for Mom`} />
+      <TopBar title={`Book ${h.first}`} sub={`${s.name} for Kamala`} />
       <div className="scroll grow-1">
         <div className="pad stack-22" style={{ paddingTop: 8 }}>
           <div className="mini-helper">
@@ -113,6 +113,8 @@ export function Book() {
             <span className={`switch ${draft.weekly ? "on" : ""}`}><motion.i layout transition={spring} /></span>
           </Tap>
 
+          <ServiceScope id={s.id} />
+
           {/* checklist */}
           <div>
             <h3 className="label">What should {h.first} do?</h3>
@@ -146,10 +148,12 @@ export function Book() {
         </div>
       </div>
 
-      <div className="dock column">
-        <SlideToConfirm disabled={!canBook} label={canBook ? `Slide to book · $${yours}` : "Pick an open time"} onDone={confirm} />
-        <Tap className="btn soft add-cart" disabled={!canBook} onClick={toCart}>
-          <ShoppingCart size={18} /> Add to cart, keep browsing
+      <div className="dock book-dock">
+        <Tap className="btn soft" disabled={!canBook} onClick={toCart} aria-label="Add to cart">
+          <ShoppingCart size={18} /> Add to cart
+        </Tap>
+        <Tap className="btn brand" disabled={!canBook} onClick={confirm} style={{ flex: 1 }}>
+          {canBook ? `Book · $${yours}` : "Pick an open time"}
         </Tap>
       </div>
     </div>

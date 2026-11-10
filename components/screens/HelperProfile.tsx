@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
-import { Award, Car, ChevronLeft, Clock, Heart, Languages, MessageCircle, Pause, Play, Repeat, Share, ShieldCheck, Star } from "lucide-react";
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
+import { Award, BadgeCheck, Car, ChevronLeft, Clock, Heart, Languages, MessageCircle, Pause, Play, Repeat, Share, ShieldCheck, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DAYS, REVIEWS, TIMES, helper, isFree, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
@@ -9,7 +9,7 @@ import { Avatar, Btn, KinlySafe, Rating, Tap, Verified } from "../kit";
 import { useStore } from "../store";
 
 export function HelperProfile() {
-  const { draft, setDraft, go, back, favs, toggleFav, toast, showSafe } = useStore();
+  const { draft, setDraft, go, back, favs, toggleFav, toast, showSafe, openChat } = useStore();
   const h = helper(draft.helperId);
   const s = svc(draft.service);
   const scroller = useRef<HTMLDivElement>(null);
@@ -27,6 +27,8 @@ export function HelperProfile() {
   }, [playing]);
 
   const fav = favs.includes(h.id);
+  const lines = h.bio.split(/(?<=[.!?:])\s+/);
+  const caption = lines[Math.min(lines.length - 1, Math.floor((t / 30) * lines.length))];
 
   return (
     <div className="screen">
@@ -55,7 +57,7 @@ export function HelperProfile() {
         <div className="pad profile-body">
           <div style={{ textAlign: "center" }}>
             <h1 className="profile-name">{h.name} <Verified size={22} /></h1>
-            <div className="muted">{h.role} · {h.years} years · {h.miles} mi from Mom</div>
+            <div className="muted">{h.role} · {h.years} years · {h.miles} mi from Kamala</div>
             <div className="row center" style={{ gap: 6, marginTop: 10, flexWrap: "wrap" }}>
               <KinlySafe big />
               {h.badges.map((b) => <span key={b} className={`tag ${b === "Top Helper" ? "gold" : ""}`}>{b}</span>)}
@@ -71,23 +73,21 @@ export function HelperProfile() {
 
           {/* intro video */}
           <Tap className="video" onClick={() => setPlaying(!playing)}>
-            <div className="video-bg" style={{ backgroundImage: `url(${h.photo})` }} />
+            <motion.div className="video-bg" style={{ backgroundImage: `url(${h.photo})` }} animate={playing ? { scale: [1.05, 1.16], x: [0, -8] } : { scale: 1.05, x: 0 }} transition={{ duration: playing ? 30 : 0.4, ease: "linear" }} />
             <div className="video-shade" />
             <span className="video-play">{playing ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" style={{ marginLeft: 3 }} />}</span>
             <div className="video-meta">
-              <b>&ldquo;Hi, I&apos;m {h.first}&rdquo;</b>
-              <span>30-sec intro · {playing ? `0:${String(t).padStart(2, "0")}` : "tap to play"}</span>
-              <div className="wave">
-                {Array.from({ length: 34 }).map((_, i) => (
-                  <motion.i key={i}
-                    animate={playing ? { scaleY: [0.3, 1, 0.5, 0.9, 0.3] } : { scaleY: 0.25 + ((i * 37) % 10) / 16 }}
-                    transition={playing ? { duration: 0.9 + (i % 5) * 0.12, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
-                    style={{ opacity: i / 34 < t / 30 ? 1 : 0.45 }}
-                  />
-                ))}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.b key={playing ? caption : "title"} className="video-cap" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                  {playing ? caption : <>&ldquo;Hi, I&apos;m {h.first}&rdquo;</>}
+                </motion.b>
+              </AnimatePresence>
+              <span>Video intro · {playing ? `0:${String(t).padStart(2, "0")} / 0:30` : "30 sec · tap to watch"}</span>
+              <div className="video-bar"><motion.i animate={{ width: `${(t / 30) * 100}%` }} transition={{ ease: "linear", duration: 1 }} /></div>
             </div>
+            <span className="video-verified"><BadgeCheck size={14} /> Face matched to ID</span>
           </Tap>
+          <p className="hint" style={{ marginTop: -12 }}>Recorded on Kinly and checked against {h.first}&apos;s photo ID, so the person at the door is the person in the video.</p>
 
           <div className="block">
             <h3>About {h.first}</h3>
@@ -141,10 +141,10 @@ export function HelperProfile() {
             </div>
           </div>
 
-          <Tap className="chat-row" onClick={() => toast(`Message sent to ${h.first}`, "check")}>
+          <Tap className="chat-row" onClick={() => openChat(h.id)}>
             <MessageCircle size={20} />
             <span className="grow">Ask {h.first} a question first</span>
-            <span className="muted small">Free</span>
+            <span className="muted small">Chat · free</span>
           </Tap>
 
           <div className="block">

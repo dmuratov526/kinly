@@ -1,10 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useTransform, animate, type PanInfo } from "motion/react";
-import { BadgeCheck, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart } from "lucide-react";
+import { BadgeCheck, ChevronDown, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "./store";
+import { svc, type ServiceId } from "./data";
 
 export const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 export const softSpring = { type: "spring", stiffness: 260, damping: 30 } as const;
@@ -246,5 +247,30 @@ export function HelpAsk({ open, onYes, onNo, onSilent }: { open: boolean; onYes:
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/* ---------- what a service covers (and doesn't) ---------- */
+
+export function ServiceScope({ id, open: start = false }: { id: ServiceId; open?: boolean }) {
+  const s = svc(id);
+  const [open, setOpen] = useState(start);
+  return (
+    <div className={`scope ${open ? "open" : ""}`} style={{ ["--hue" as string]: s.hue, ["--tint" as string]: s.tint }}>
+      <button className="scope-head" onClick={() => setOpen(!open)}>
+        <span>What <b>{s.name}</b> covers</span>
+        <motion.span animate={{ rotate: open ? 180 : 0 }}><ChevronDown size={18} /></motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+            <div className="scope-body">
+              {s.includes.map((x) => <div key={x} className="scope-row yes"><Check size={15} strokeWidth={3} />{x}</div>)}
+              {s.excludes.map((x) => <div key={x} className="scope-row no"><X size={15} strokeWidth={3} />{x}</div>)}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

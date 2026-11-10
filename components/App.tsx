@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { BatteryFull, CalendarDays, Check, Compass, HeartPulse, Heart, House, IdCard, Info, ListOrdered, ShieldCheck, ShoppingCart, Signal, Umbrella, Wifi, X } from "lucide-react";
+import { BatteryFull, CalendarDays, Check, Compass, Globe, HeartPulse, Heart, House, IdCard, Info, ListOrdered, ShieldCheck, ShoppingCart, Signal, Umbrella, Wifi, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { DEMO_CART, SEED_VISITS, day, svc, type CartItem, type Visit } from "./data";
 import { Btn, CountBadge, Sheet, softSpring } from "./kit";
-import { NO_FILTERS, StoreCtx, TAB_ROOTS, useStore, type Draft, type LiveStage, type ScreenId, type Store } from "./store";
+import { NO_FILTERS, StoreCtx, TAB_ROOTS, useStore, type Draft, type LiveStage, type MomRequest, type ScreenId, type Store } from "./store";
 import { Home } from "./screens/Home";
 import { Explore } from "./screens/Explore";
 import { HelperProfile } from "./screens/HelperProfile";
@@ -16,28 +16,29 @@ import { Live } from "./screens/Live";
 import { Report } from "./screens/Report";
 import { Emergency, Mom, MomMap } from "./screens/Mom";
 import { Cart } from "./screens/Cart";
+import { Chat } from "./screens/Chat";
 
 const SCREENS: Record<ScreenId, ComponentType> = {
-  home: Home, explore: Explore, helper: HelperProfile, book: Book, confirmed: Confirmed, cart: Cart,
+  home: Home, explore: Explore, helper: HelperProfile, book: Book, confirmed: Confirmed, cart: Cart, chat: Chat,
   visits: Visits, live: Live, report: Report, mom: Mom, momMap: MomMap, emergency: Emergency,
 };
 
 /** The pitch, in order. Each step says what it fixes from the critique. */
 const STORY: { id: ScreenId; title: string; why: string; points: string[] }[] = [
-  { id: "home", title: "Home", why: "A homepage that feels like one", points: ["What's happening with Mom right now, live", "\"Mom's usual\": rebook her week in one tap", "Categories with prices, like a real marketplace", "Cart in the header to stack several visits"] },
-  { id: "explore", title: "Find help", why: "One search bar + filters", points: ["Services, time and needs in one place", "Filters that really filter: price, language, rating, distance", "Match me picks the best fit instantly"] },
-  { id: "helper", title: "Helper profile", why: "Trust in five seconds", points: ["Photo, video intro and the Kinly Safe badge up top", "Ask a question before reading reviews", "Live availability for the week"] },
-  { id: "book", title: "Book", why: "Booking on one screen", points: ["Day, time, length and checklist together", "Book now, or add to cart and stack visits", "Small 5% care fee, charged after the visit"] },
-  { id: "confirmed", title: "Booked", why: "A moment of relief", points: ["Clear ticket with time and door PIN", "Mom gets a text with Sunita's photo", "Family is looped in automatically"] },
+  { id: "home", title: "Home", why: "A homepage that feels like one", points: ["What's happening with Kamala right now, live", "Requests Kamala sends from her own app", "Recommendations that keep a steady rhythm of visits", "Chat with helpers, cart and language up top"] },
+  { id: "explore", title: "Find help", why: "One search bar + filters", points: ["Services, time and needs in one place", "Clear scope: what each service covers, and what it doesn't", "Match me picks the best fit instantly"] },
+  { id: "helper", title: "Helper profile", why: "Trust in five seconds", points: ["Video intro, face matched to ID, Kinly Safe badge", "Chat with the helper before booking", "Live availability for the week"] },
+  { id: "book", title: "Book", why: "Booking on one screen", points: ["Day, time, length and checklist together", "Book now or add to cart, side by side", "Small 5% care fee, charged after the visit"] },
+  { id: "confirmed", title: "Booked", why: "A moment of relief", points: ["Clear ticket with time and door PIN", "Kamala is notified too, with Sunita's photo", "Chat with Sunita right from the ticket"] },
   { id: "visits", title: "Visits", why: "Track what you've booked", points: ["Upcoming and Past, the missing Job-to-be-done", "Live visit pinned to the top", "Rebook a favorite in one tap"] },
-  { id: "live", title: "Live visit", why: "Peace of mind, in real time", points: ["Live map on real streets, with ETA", "Emergency button always in view", "Tasks tick off and photos arrive live"] },
+  { id: "live", title: "Live visit", why: "Peace of mind, in real time", points: ["Live map on real streets, with ETA", "Emergency button always in view", "Extend the visit when she wants more time"] },
   { id: "report", title: "Visit report", why: "Proof of care", points: ["Mood, meals, meds and steps at a glance", "Turn Sunita's note into a question for the doctor", "Rate in two taps"] },
-  { id: "mom", title: "Mom's phone", why: "Mom's own app, built for 78", points: ["A separate app: no tabs, nothing in the way", "Her door code and where Sunita is right now", "One tap for help, then a calm yes / I'm okay"] },
+  { id: "mom", title: "Kamala's phone", why: "Kamala's own app, built for 78", points: ["Her own app: she can ask for a visit herself", "Her door code and where Sunita is right now", "One tap for help, then a calm yes / I'm okay"] },
   { id: "emergency", title: "Emergency", why: "When it really matters", points: ["911, family and a nurse in one tap", "Meds and allergies shared with responders", "Cancel if it was a false alarm"] },
 ];
 
 const PARENT: Partial<Record<ScreenId, ScreenId>> = {
-  helper: "explore", book: "explore", confirmed: "home", live: "visits", report: "visits", emergency: "mom", momMap: "mom",
+  helper: "explore", book: "explore", confirmed: "home", chat: "home", live: "visits", report: "visits", emergency: "mom", momMap: "mom",
 };
 const stackFor = (id: ScreenId): ScreenId[] =>
   TAB_ROOTS.includes(id) || id === "mom" ? [id] : id === "book" ? ["explore", "helper", "book"] : [PARENT[id] ?? "home", id];
@@ -67,6 +68,9 @@ export default function App() {
   const [live, setLiveState] = useState<LiveStage>(0);
   const [driveStart, setDriveStart] = useState(() => Date.now());
   const [safe, setSafe] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [chatWith, setChatWith] = useState("sunita");
+  const [requests, setRequests] = useState<MomRequest[]>([]);
   const [splash, setSplash] = useState(true);
   const hideSplash = useCallback(() => setSplash(false), []);
   const setLive = useCallback((s: LiveStage) => {
@@ -150,6 +154,11 @@ export default function App() {
     live, setLive, driveStart,
     favs, toggleFav: (id) => setFavs((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id])),
     showSafe: () => setSafe(true),
+    showLang: () => setLangOpen(true),
+    chatWith, openChat: (id) => { setChatWith(id); go("chat"); },
+    requests,
+    addRequest: (r) => setRequests((rs) => [...rs.filter((x) => x.id !== r.id), r]),
+    resolveRequest: (id) => setRequests((rs) => rs.filter((x) => x.id !== id)),
   };
 
   /* ---------- story stepping (desktop arrows) ---------- */
@@ -200,8 +209,8 @@ export default function App() {
             <span className="brand-mark"><Heart size={18} fill="currentColor" strokeWidth={0} /></span>
             kinly
           </div>
-          <h1 className="pitch-title">Care for Mom,<br /><i>from anywhere.</i></h1>
-          <p className="pitch-sub">Book vetted helpers for your parents, watch every visit live, and get a report when it&apos;s done.</p>
+          <h1 className="pitch-title">Care for<br />loved ones,<br /><i>from anywhere.</i></h1>
+          <p className="pitch-sub">Book vetted helpers for your parents and grandparents, watch every visit live, and get a report when it&apos;s done.</p>
           <nav className="story">
             {STORY.map((s, i) => (
               <button key={s.id} className={s.id === screen ? "on" : ""} onClick={() => jump(s.id)}>
@@ -259,6 +268,10 @@ export default function App() {
 
               <Sheet open={safe} onClose={() => setSafe(false)}>
                 <SafeSheet onClose={() => setSafe(false)} />
+              </Sheet>
+
+              <Sheet open={langOpen} onClose={() => setLangOpen(false)} title="Language">
+                <LangSheet onPick={(l) => { setLangOpen(false); if (l !== "English") toast(`${l} is coming soon`, "info"); }} />
               </Sheet>
 
               <AnimatePresence>
@@ -331,10 +344,31 @@ function Splash({ onDone }: { onDone: () => void }) {
         kinly
       </motion.div>
       <motion.p className="splash-tag" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
-        Care for Mom, <i>from anywhere</i>
+        Care for loved ones, <i>from anywhere</i>
       </motion.p>
       <div className="splash-dots"><i /><i /><i /></div>
     </motion.div>
+  );
+}
+
+const LANGS = [
+  ["English", "English"], ["हिन्दी", "Hindi"], ["Español", "Spanish"], ["中文", "Chinese"], ["한국어", "Korean"],
+  ["Tiếng Việt", "Vietnamese"], ["Русский", "Russian"], ["العربية", "Arabic"], ["Kreyòl", "Haitian Creole"],
+];
+
+/** Placeholder: the picker is real, the translations are not done yet. */
+function LangSheet({ onPick }: { onPick: (l: string) => void }) {
+  return (
+    <div className="lang-list">
+      <p className="hint" style={{ margin: "-8px 0 8px" }}><Globe size={13} style={{ verticalAlign: -2 }} /> Each person picks their own. Kamala can use Kinly in Hindi while you use English.</p>
+      {LANGS.map(([native, en]) => (
+        <button key={en} className={`lang-row ${en === "English" ? "on" : ""}`} onClick={() => onPick(en === "English" ? "English" : native)}>
+          <b>{native}</b>
+          {native !== en && <span>{en}</span>}
+          {en === "English" ? <Check size={18} strokeWidth={3} className="ok" /> : <em>Soon</em>}
+        </button>
+      ))}
+    </div>
   );
 }
 

@@ -15,6 +15,7 @@ export const passes = (h: Helper, f: Filters, service: ServiceId | null, favs: s
   (f.minRating == null || h.rating >= f.minRating) &&
   (f.maxMiles == null || h.miles <= f.maxMiles) &&
   (f.maxRate == null || cardRate(h, service).rate <= f.maxRate) &&
+  (f.minRate == null || cardRate(h, service).rate >= f.minRate) &&
   (!f.car || h.badges.includes("Has a car")) &&
   (f.gender === "any" || h.gender === f.gender) &&
   (!f.medical || h.medical) &&
@@ -22,7 +23,7 @@ export const passes = (h: Helper, f: Filters, service: ServiceId | null, favs: s
   f.skills.every((s) => h.skills.includes(s));
 
 export const activeCount = (f: Filters) =>
-  Number(f.today) + f.langs.length + Number(f.minRating != null) + Number(f.maxMiles != null) + Number(f.maxRate != null) +
+  Number(f.today) + f.langs.length + Number(f.minRating != null) + Number(f.maxMiles != null) + Number(f.maxRate != null || f.minRate != null) +
   Number(f.car) + Number(f.gender !== "any") + Number(f.medical) + Number(f.saved) + f.skills.length;
 
 const NATIVE: Record<string, string> = {
@@ -96,20 +97,30 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
 
       <div className="fs-body" onPointerDown={(e) => e.stopPropagation()}>
         {/* price */}
-        <Block title={service ? `Price · ${svc(service).name}` : "Price"} value={f.maxRate == null ? "Any price" : `Up to $${f.maxRate}/${unit}`}>
+        <Block title={service ? `Price · ${svc(service).name}` : "Price"} value={f.minRate != null ? `$${f.minRate}+/${unit}` : f.maxRate == null ? "Any price" : `Up to $${f.maxRate}/${unit}`}>
+          <div className="chip-wrap" style={{ marginBottom: 14 }}>
+            {([["$15 or less", { maxRate: 15, minRate: null }], ["$25 or less", { maxRate: 25, minRate: null }], ["$25+", { maxRate: null, minRate: 25 }]] as const).map(([label, p]) => {
+              const on = f.maxRate === p.maxRate && f.minRate === p.minRate;
+              return (
+                <Tap key={label} className={`fs-lang ${on ? "on" : ""}`} onClick={() => setF(on ? { maxRate: null, minRate: null } : p)}>
+                  <b>{label}</b><em>{countWith(p)}</em>
+                </Tap>
+              );
+            })}
+          </div>
           <div className="fs-hist">
             {priceBuckets.map(({ v, c }) => {
-              const on = f.maxRate == null || v <= f.maxRate;
+              const on = (f.maxRate == null || v <= f.maxRate) && (f.minRate == null || v >= f.minRate);
               return <motion.i key={v} animate={{ height: bar(c, Math.max(...priceBuckets.map((b) => b.c))), opacity: on ? 1 : 0.25 }} className={on ? "on" : ""} transition={spring} />;
             })}
           </div>
           <Slider min={rMin} max={rMax} step={1} value={f.maxRate ?? rMax}
-            onChange={(v) => setF({ maxRate: v >= rMax ? null : v })} />
+            onChange={(v) => setF({ maxRate: v >= rMax ? null : v, minRate: null })} />
           <div className="fs-ends"><span>${rMin}</span><span>${rMax}+</span></div>
         </Block>
 
         {/* distance: how many helpers live how far from Mom */}
-        <Block title="Distance from Mom" value={f.maxMiles == null ? "Any distance" : `Within ${f.maxMiles.toFixed(1)} mi · ${countWith({})} helpers`}>
+        <Block title="Distance from Kamala" value={f.maxMiles == null ? "Any distance" : `Within ${f.maxMiles.toFixed(1)} mi · ${countWith({})} helpers`}>
           <div className="fs-hist">
             {mileBuckets.map(({ v, c }) => {
               const on = f.maxMiles == null || v <= f.maxMiles + 1e-9;
@@ -184,7 +195,7 @@ export function FilterSheet({ open, onClose, f, setF, base, service, favs }: {
           <Segmented id="rating" value={String(f.minRating)} onChange={(v) => setF({ minRating: v === "null" ? null : Number(v) })}
             options={[["null", "Any"], ["4.8", "4.8+ ★"], ["4.9", "4.9+ ★"], ["4.95", "4.95+ ★"]]} />
         </Block>
-        <Block title="Mom feels most comfortable with">
+        <Block title="Kamala feels most comfortable with">
           <Segmented id="gender" value={f.gender} onChange={(v) => setF({ gender: v as Filters["gender"] })}
             options={[["any", "Anyone"], ["f", "A woman"], ["m", "A man"]]} />
         </Block>

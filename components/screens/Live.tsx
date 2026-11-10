@@ -1,17 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ChevronLeft, ChevronRight, HeartPulse, KeyRound, MessageCircle, Phone, Play, Send, Siren, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Clock, HeartPulse, KeyRound, MessageCircle, Phone, Play, Send, Siren, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { helper } from "../data";
 import { StreetMap, useDrive } from "../map";
 import { Avatar, Btn, Rating, Sheet, Tap, spring } from "../kit";
 import { useStore, type LiveStage } from "../store";
 
-const STAGES = ["On the way", "Arrived", "With Mom", "Done"];
+const STAGES = ["On the way", "Arrived", "With Kamala", "Done"];
 
 export function Live() {
-  const { live, setLive, back, go, toast } = useStore();
+  const { live, setLive, back, go, toast, openChat } = useStore();
   const h = helper("sunita");
   const { p, mins } = useDrive(true);
   const [sos, setSos] = useState(false);
@@ -61,7 +61,7 @@ export function Live() {
             <div className="row" style={{ gap: 8 }}><Rating value={h.rating} /><span className="small muted">Toyota Corolla · KXT 2291</span></div>
           </div>
           <Tap className="round-btn" onClick={() => toast(`Calling ${h.first}…`, "info")} aria-label="Call"><Phone size={19} /></Tap>
-          <Tap className="round-btn" onClick={() => toast(`Chat with ${h.first}`, "info")} aria-label="Chat"><MessageCircle size={19} /></Tap>
+          <Tap className="round-btn" onClick={() => openChat(h.id)} aria-label="Chat"><MessageCircle size={19} /></Tap>
         </div>
 
         {/* always in view, never behind a scroll */}
@@ -88,16 +88,16 @@ export function Live() {
         )}
       </motion.div>
 
-      <Sheet open={sos} onClose={() => setSos(false)} title="What's happening with Mom?">
+      <Sheet open={sos} onClose={() => setSos(false)} title="What's happening with Kamala?">
         <div className="stack-10">
           <Tap className="sos-opt red" onClick={fire}>
             <span className="sos-opt-ic"><Siren size={22} /></span>
-            <div className="grow"><b>Call 911 to Mom&apos;s home</b><span>37-12 82nd St · Sunita and Anita are alerted</span></div>
+            <div className="grow"><b>Call 911 to Kamala&apos;s home</b><span>37-12 82nd St · Sunita and Anita are alerted</span></div>
             <ChevronRight size={18} />
           </Tap>
           <Tap className="sos-opt" onClick={() => { setSos(false); toast(`Calling ${h.first}…`, "info"); }}>
             <span className="sos-opt-ic green"><Phone size={20} /></span>
-            <div className="grow"><b>Call {h.first}</b><span>{live >= 1 && live <= 2 ? "She's with Mom right now" : `${mins} min from Mom`}</span></div>
+            <div className="grow"><b>Call {h.first}</b><span>{live >= 1 && live <= 2 ? "She's with Kamala right now" : `${mins} min from Kamala`}</span></div>
             <ChevronRight size={18} />
           </Tap>
           <Tap className="sos-opt" onClick={() => { setSos(false); toast("Connecting to a Kinly nurse…", "info"); }}>
@@ -117,7 +117,7 @@ function StageOnTheWay() {
       <div className="pin-card">
         <span className="pin-ic"><KeyRound size={20} /></span>
         <div className="grow">
-          <span className="small muted">Door PIN · Mom reads it to Sunita</span>
+          <span className="small muted">Door PIN · Kamala reads it to Sunita</span>
           <div className="pin-digits">{"4821".split("").map((d, i) => <motion.b key={i} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 * i }}>{d}</motion.b>)}</div>
         </div>
       </div>
@@ -125,7 +125,7 @@ function StageOnTheWay() {
         <div className="tl-row on"><i /> <span><b>Booked</b> · Mon 6:12 PM</span></div>
         <div className="tl-row on"><i /> <span><b>Left home</b> · 1:52 PM · 0.8 mi away</span></div>
         <div className="tl-row"><i /> <span>Checks in with the PIN</span></div>
-        <div className="tl-row"><i /> <span>Chai, walk and rummy with Mom</span></div>
+        <div className="tl-row"><i /> <span>Chai, walk and rummy with Kamala</span></div>
       </div>
     </div>
   );
@@ -137,7 +137,7 @@ function StageArrived() {
       <div className="arrived">
         <motion.span className="arrived-check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 14 }}><Check size={22} strokeWidth={3} /></motion.span>
         <div>
-          <b>Sunita is inside with Mom</b>
+          <b>Sunita is inside with Kamala</b>
           <span>2:01 PM · PIN 4821 matched · location verified</span>
         </div>
       </div>
@@ -150,6 +150,9 @@ type Item = { who: "sunita" | "you"; text: string; time: string; photo?: boolean
 
 function StageInVisit() {
   const { toast } = useStore();
+  const [extendOpen, setExtendOpen] = useState(false);
+  const [extra, setExtra] = useState(0);
+  const ends = ["5:00 PM", "5:30 PM", "6:00 PM"][extra];
   const [tasks, setTasks] = useState([
     { t: "Chat over chai", on: true },
     { t: "Short walk in Travers Park", on: true },
@@ -192,9 +195,9 @@ function StageInVisit() {
         </div>
         <div className="grow">
           <b>Tasks</b>
-          <div className="small muted">1 hr 12 min of 3 hrs · ends 5:00 PM</div>
+          <div className="small muted">1 hr 12 min of {3 + extra / 2} hrs · ends {ends}</div>
         </div>
-        <Tap className="mini-btn" onClick={() => toast("Sunita asked for +30 min · approved", "check")}>+ Time</Tap>
+        <Tap className="mini-btn" onClick={() => setExtendOpen(true)}><Clock size={14} /> Extend visit</Tap>
       </div>
       <div className="live-tasks">
         {tasks.map((x) => (
@@ -223,6 +226,21 @@ function StageInVisit() {
         <input placeholder="Message Sunita…" value={msg} onChange={(e) => setMsg(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
         <Tap className="send" onClick={send} aria-label="Send"><Send size={17} /></Tap>
       </div>
+      <Sheet open={extendOpen} onClose={() => setExtendOpen(false)} title="Need Sunita a bit longer?">
+        <p className="extend-why">Kamala is enjoying the visit, or something came up: a late delivery, a call with the doctor, a walk that ran long. Add time here instead of booking a new visit. Sunita confirms she&apos;s free.</p>
+        <div className="stack-10">
+          {[[1, "+30 min", "$10"], [2, "+1 hour", "$21"]].map(([n, label, price]) => (
+            <Tap key={label} className="extend-opt" onClick={() => {
+              setExtra(n as number); setExtendOpen(false);
+              toast(`Sunita said yes · now ends ${["5:00 PM", "5:30 PM", "6:00 PM"][n as number]}`, "check");
+            }}>
+              <Clock size={20} />
+              <div className="grow"><b>{label}</b><span>Ends {["5:00 PM", "5:30 PM", "6:00 PM"][n as number]} · charged only for the time used</span></div>
+              <b>{price}</b>
+            </Tap>
+          ))}
+        </div>
+      </Sheet>
     </div>
   );
 }
@@ -233,7 +251,7 @@ function StageDone({ onReport }: { onReport: () => void }) {
       <div className="arrived done">
         <motion.span className="arrived-check" initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 14 }}><Sparkles size={20} /></motion.span>
         <div>
-          <b>Mom had a lovely afternoon</b>
+          <b>Kamala had a lovely afternoon</b>
           <span>Checked out 5:04 PM · 4 of 4 tasks done</span>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 import type { CartItem, ServiceId, Visit } from "./data";
 
 export type ScreenId =
-  | "home" | "explore" | "helper" | "book" | "confirmed" | "cart"
+  | "home" | "explore" | "helper" | "book" | "confirmed" | "cart" | "chat"
   | "visits" | "live" | "report" | "mom" | "momMap" | "emergency";
 
 /** Rohan's app tabs. Mom's phone is its own app and has no tab bar. */
@@ -29,13 +29,14 @@ export type Filters = {
   minRating: number | null;
   maxMiles: number | null;
   maxRate: number | null;
+  minRate: number | null;
   car: boolean;
   gender: "any" | "f" | "m";
   medical: boolean;
   saved: boolean;
   skills: string[];
 };
-export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, car: false, gender: "any", medical: false, saved: false, skills: [] };
+export const NO_FILTERS: Filters = { today: false, langs: [], minRating: null, maxMiles: null, maxRate: null, minRate: null, car: false, gender: "any", medical: false, saved: false, skills: [] };
 
 export type Store = {
   screen: ScreenId;
@@ -72,7 +73,20 @@ export type Store = {
   toggleFav: (id: string) => void;
 
   showSafe: () => void;
+  /** language picker (a placeholder for now: translations are coming) */
+  showLang: () => void;
+
+  /** who the chat screen is talking to */
+  chatWith: string;
+  openChat: (helperId: string) => void;
+
+  /** visits Kamala asked for from her own app, waiting for the family to approve */
+  requests: MomRequest[];
+  addRequest: (r: MomRequest) => void;
+  resolveRequest: (id: string) => void;
 };
+
+export type MomRequest = { id: string; service: ServiceId; what: string; when: string; helperId: string };
 
 export const StoreCtx = createContext<Store | null>(null);
 export const useStore = () => {

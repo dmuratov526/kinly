@@ -12,6 +12,9 @@ export type Service = {
   hue: string;
   tint: string;
   tasks: { t: string; on: boolean }[];
+  /** what families can expect, so nobody books Tech help to build an app */
+  includes: string[];
+  excludes: string[];
 };
 
 export const SERVICES: Service[] = [
@@ -24,16 +27,20 @@ export const SERVICES: Service[] = [
       { t: "Play rummy or carrom", on: true },
       { t: "Video-call the family", on: false },
     ],
+    includes: ["Conversation, tea and card games", "Short walks and fresh air", "Reading, music, photo albums", "Video calls with the family"],
+    excludes: ["Medical care or giving medication", "Bathing or personal care"],
   },
   {
     id: "escort", name: "Doctor visits", short: "Doctor", blurb: "Door-to-door rides plus notes from the doctor", from: 25, unit: "hr",
     hue: "#7B5CF0", tint: "#EEE9FE",
     tasks: [
-      { t: "Pick Mom up from home", on: true },
+      { t: "Pick Kamala up from home", on: true },
       { t: "Stay with her at the appointment", on: true },
       { t: "Take notes from the doctor", on: true },
       { t: "Pharmacy pickup on the way back", on: false },
     ],
+    includes: ["Door-to-door ride or accompanied transit", "Waiting with them at the appointment", "Notes on what the doctor said", "Pharmacy pickup on the way back"],
+    excludes: ["Making medical decisions", "Driving without the helper present"],
   },
   {
     id: "errands", name: "Errands", short: "Errands", blurb: "Groceries, pharmacy and post office", from: 15, unit: "hr",
@@ -44,9 +51,11 @@ export const SERVICES: Service[] = [
       { t: "Put everything away", on: true },
       { t: "Post office drop-off", on: false },
     ],
+    includes: ["Groceries and pharmacy pickups", "Post office, bank, dry cleaning", "Carrying bags and putting things away", "Receipts and change returned"],
+    excludes: ["Paying bills on their behalf", "Big furniture or moving"],
   },
   {
-    id: "home", name: "Home help", short: "Home", blurb: "Light cleaning, laundry and fresh sheets", from: 20, unit: "hr",
+    id: "home", name: "House help", short: "House", blurb: "Light cleaning, laundry and fresh sheets", from: 20, unit: "hr",
     hue: "#22A57A", tint: "#DFF5EC",
     tasks: [
       { t: "Tidy kitchen and living room", on: true },
@@ -54,6 +63,8 @@ export const SERVICES: Service[] = [
       { t: "Change the bed sheets", on: true },
       { t: "Take out the trash", on: false },
     ],
+    includes: ["Tidying, dusting, vacuuming", "Laundry, folding, fresh sheets", "Kitchen and bathroom wipe-down", "Taking out trash and recycling"],
+    excludes: ["Deep cleaning or carpets", "Repairs, plumbing or electrical"],
   },
   {
     id: "tech", name: "Tech help", short: "Tech", blurb: "Video calls, bigger text, no more spam", from: 18, unit: "hr",
@@ -64,6 +75,8 @@ export const SERVICES: Service[] = [
       { t: "Show her the family photo album", on: true },
       { t: "Block spam calls", on: false },
     ],
+    includes: ["Phone, tablet and TV basics", "Video calls, WhatsApp, photos", "Bigger text, louder ringer", "Blocking spam and scam calls"],
+    excludes: ["Building apps or websites", "Repairing broken devices", "Setting up a home network from scratch"],
   },
   {
     id: "wellness", name: "Wellness check", short: "Check-in", blurb: "A 45-min check on meals, meds and mood", from: 30, unit: "visit",
@@ -74,6 +87,8 @@ export const SERVICES: Service[] = [
       { t: "Look for trip hazards", on: true },
       { t: "Check the fridge", on: false },
     ],
+    includes: ["Did they eat, drink, take morning meds", "Mood check and a short chat", "Spotting trip hazards", "A note to the family afterwards"],
+    excludes: ["Medical exams or treatment", "Changing prescriptions"],
   },
 ];
 export const svc = (id: ServiceId) => SERVICES.find((s) => s.id === id)!;
@@ -277,7 +292,7 @@ export const helper = (id: string) => HELPERS.find((h) => h.id === id) ?? HELPER
 
 export const REVIEWS = [
   { who: "Anjali M.", rel: "daughter", photo: "/img/rev1.jpg", when: "2 weeks ago", stars: 5, text: "My father now asks every Monday when Sunita is coming. Sunita sends photos after every walk and the notes from his cardiologist were better than mine." },
-  { who: "David K.", rel: "son", photo: "/img/rev3.jpg", when: "1 month ago", stars: 5, text: "Calm, punctual, kind. Sunita noticed Mom's new dizziness before we did and flagged it right away." },
+  { who: "David K.", rel: "son", photo: "/img/rev3.jpg", when: "1 month ago", stars: 5, text: "Calm, punctual, kind. Sunita noticed Kamala's new dizziness before we did and flagged it right away." },
   { who: "Leila S.", rel: "granddaughter", photo: "/img/rev2.jpg", when: "1 month ago", stars: 5, text: "Grandma lit up the moment Sunita walked in. Worth every penny." },
 ];
 
@@ -321,7 +336,13 @@ export const FEE = 0.05;
 export const rateFor = (h: Helper, s: Service) => (s.unit === "visit" ? s.from : s.from + h.adj);
 /** The rate to show on a card when no service is picked yet. */
 export const cardRate = (h: Helper, service?: ServiceId | null) => {
-  const s = svc(service && h.services.includes(service) ? service : h.services.find((x) => svc(x).unit === "hr") ?? h.services[0]);
+  if (service && h.services.includes(service)) {
+    const s = svc(service);
+    return { rate: rateFor(h, s), unit: s.unit };
+  }
+  // no service picked: show their lowest hourly rate, the honest "from" price
+  const hourly = h.services.map(svc).filter((x) => x.unit === "hr");
+  const s = hourly.length ? hourly.reduce((a, b) => (rateFor(h, a) <= rateFor(h, b) ? a : b)) : svc(h.services[0]);
   return { rate: rateFor(h, s), unit: s.unit };
 };
 
@@ -353,10 +374,10 @@ export const SEED_VISITS: Visit[] = [
   { id: "v-live", helperId: "sunita", service: "companion", dayKey: "today", dateLabel: "Today", time: "2:00 PM", hours: 3, status: "live", weekly: true, total: totalFor("sunita", "companion", 3) },
   { id: "v2", helperId: "denise", service: "escort", dayKey: "tue", dateLabel: "Tue, Nov 17", time: "10:00 AM", hours: 2, status: "upcoming", total: totalFor("denise", "escort", 2) },
   { id: "v3", helperId: "sunita", service: "companion", dayKey: "thu2", dateLabel: "Thu, Nov 19", time: "2:00 PM", hours: 3, status: "upcoming", weekly: true, total: totalFor("sunita", "companion", 3) },
-  { id: "p1", helperId: "sunita", service: "companion", dayKey: "p1", dateLabel: "Thu, Nov 5", time: "2:00 PM", hours: 3, status: "past", weekly: true, rated: 5, summary: "Walked to the park, played rummy, Mom won twice.", total: totalFor("sunita", "companion", 3) },
+  { id: "p1", helperId: "sunita", service: "companion", dayKey: "p1", dateLabel: "Thu, Nov 5", time: "2:00 PM", hours: 3, status: "past", weekly: true, rated: 5, summary: "Walked to the park, played rummy, Kamala won twice.", total: totalFor("sunita", "companion", 3) },
   { id: "p2", helperId: "maria", service: "home", dayKey: "p2", dateLabel: "Fri, Oct 30", time: "11:00 AM", hours: 2, status: "past", rated: 5, summary: "Kitchen deep clean, laundry, fresh sheets.", total: totalFor("maria", "home", 2) },
   { id: "p3", helperId: "denise", service: "escort", dayKey: "p3", dateLabel: "Tue, Oct 27", time: "9:30 AM", hours: 3, status: "past", rated: 5, summary: "Cardiology follow-up. BP is stable, keep current dose.", total: totalFor("denise", "escort", 3) },
-  { id: "p4", helperId: "tom", service: "tech", dayKey: "p4", dateLabel: "Sat, Oct 24", time: "1:00 PM", hours: 1, status: "past", rated: 4, summary: "Set up WhatsApp video. Mom called you herself!", total: totalFor("tom", "tech", 1) },
+  { id: "p4", helperId: "tom", service: "tech", dayKey: "p4", dateLabel: "Sat, Oct 24", time: "1:00 PM", hours: 1, status: "past", rated: 4, summary: "Set up WhatsApp video. Kamala called you herself!", total: totalFor("tom", "tech", 1) },
 ];
 
 /* ---------- cart ---------- */

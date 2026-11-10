@@ -6,8 +6,8 @@ const sans = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap", variable: 
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], display: "swap", variable: "--font-serif" });
 
 export const metadata: Metadata = {
-  title: "Kinly · Care for Mom, from anywhere",
-  description: "Clickable prototype: book vetted helpers for your parents, watch the visit live, get a report.",
+  title: "Kinly · Care for loved ones, from anywhere",
+  description: "Clickable prototype: book vetted helpers for your parents and grandparents, watch the visit live, get a report.",
 };
 
 export const viewport: Viewport = {
