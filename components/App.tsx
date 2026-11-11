@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ComponentType } from "re
 import { DEMO_CART, SEED_VISITS, day, svc, type CartItem, type Visit } from "./data";
 import { Btn, CountBadge, Sheet, softSpring } from "./kit";
 import { NO_FILTERS, StoreCtx, TAB_ROOTS, useStore, type Draft, type LiveStage, type MomRequest, type ScreenId, type Store } from "./store";
+import { KinlyMark } from "./icons";
 import { Home } from "./screens/Home";
 import { Explore } from "./screens/Explore";
 import { HelperProfile } from "./screens/HelperProfile";
@@ -209,7 +210,7 @@ export default function App() {
         {/* ---------- left: pitch ---------- */}
         <aside className="pitch">
           <div className="brand">
-            <span className="brand-mark"><Heart size={18} fill="currentColor" strokeWidth={0} /></span>
+            <span className="brand-mark"><KinlyMark size={22} /></span>
             kinly
           </div>
           <h1 className="pitch-title">Care for<br />loved ones,<br /><i>from anywhere.</i></h1>
@@ -343,7 +344,7 @@ function Splash({ onDone }: { onDone: () => void }) {
     <motion.div className="splash" onClick={onDone} exit={{ opacity: 0, scale: 1.06 }} transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}>
       <div className="splash-glow" />
       <motion.div className="splash-logo" initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 18 }}>
-        <span className="splash-mark"><Heart size={34} fill="currentColor" strokeWidth={0} /></span>
+        <span className="splash-mark"><KinlyMark size={42} /></span>
         kinly
       </motion.div>
       <motion.p className="splash-tag" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>

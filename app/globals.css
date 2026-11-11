@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    KINLY · design system
    warm paper, deep ink, a coral→rose brand gradient
    ========================================================= */
@@ -86,7 +86,7 @@ img { display: block; }
 
 .pitch, .why { position: relative; z-index: 1; width: 300px; flex-shrink: 0; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 26px; letter-spacing: -.03em; }
-.brand-mark { width: 34px; height: 34px; border-radius: 11px; background: var(--brand); display: grid; place-items: center; box-shadow: var(--sh-brand); }
+.brand-mark { width: 36px; height: 36px; border-radius: 11px; background: #EF6A55; color: #FBF4EE; display: grid; place-items: center; box-shadow: 0 10px 24px -8px rgba(239, 106, 85, .6); }
 .pitch-title { font-family: var(--font-serif); font-weight: 400; font-size: 54px; line-height: .98; letter-spacing: -.02em; margin: 36px 0 14px; }
 .pitch-title i { background: linear-gradient(90deg, #FFB08A, #FF7AA0); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 4px; }
 .pitch-sub { color: rgba(255, 255, 255, .62); font-size: 15px; line-height: 1.55; margin: 0 0 28px; }
@@ -800,7 +800,7 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
   background: linear-gradient(160deg, #FF8A4C 0%, #FF4F7B 55%, #C2306B 100%); }
 .splash-glow { position: absolute; inset: -20%; background: radial-gradient(40% 30% at 30% 25%, rgba(255, 255, 255, .35), transparent 70%), radial-gradient(45% 35% at 80% 85%, rgba(123, 92, 240, .45), transparent 70%); animation: heroShift 6s ease-in-out infinite alternate; }
 .splash-logo { position: relative; display: flex; align-items: center; gap: 12px; font-size: 52px; font-weight: 800; letter-spacing: -.045em; }
-.splash-mark { width: 66px; height: 66px; border-radius: 21px; display: grid; place-items: center; background: #fff; color: var(--brand-2); box-shadow: 0 18px 40px -12px rgba(80, 10, 40, .6); }
+.splash-mark { width: 66px; height: 66px; border-radius: 21px; display: grid; place-items: center; background: #fff; color: #EF6A55; box-shadow: 0 18px 40px -12px rgba(80, 10, 40, .6); }
 .splash-tag { position: relative; margin: 0; font-family: var(--font-serif); font-size: 26px; color: rgba(255, 255, 255, .95); }
 .splash-tag i { font-style: italic; }
 .splash-dots { position: absolute; bottom: 92px; display: flex; gap: 8px; }
@@ -1021,6 +1021,8 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .scope-row.yes svg { color: var(--green); flex-shrink: 0; }
 .scope-row.no { color: var(--ink-3); }
 .scope-row.no svg { color: var(--red); flex-shrink: 0; }
+.info-dot { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: var(--ink-2); }
+.info-dot:hover { color: var(--ink); background: var(--line-2); }
 
 /* video intro */
 .video-cap { font-family: var(--font-sans) !important; font-style: normal !important; font-size: 15px !important; font-weight: 700 !important; line-height: 1.35; min-height: 40px; display: block; text-shadow: 0 1px 8px rgba(0, 0, 0, .5); }

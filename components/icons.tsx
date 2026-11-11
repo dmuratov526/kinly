@@ -20,3 +20,16 @@ export function ServiceGlyph({ id, size = 44, radius = 14 }: { id: ServiceId; si
     </span>
   );
 }
+
+/** The Kinly mark: an arch sheltering two people. Drawn in currentColor. */
+export function KinlyMark({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size * 0.86} viewBox="0 0 420 360" fill="currentColor" aria-hidden>
+      <path d="M26 232 A184 204 0 0 1 394 232" fill="none" stroke="currentColor" strokeWidth={48} strokeLinecap="round" />
+      <circle cx={158} cy={182} r={40} />
+      <path d="M97 352 C97 292 122 250 160 250 C198 250 222 292 222 352 Z" />
+      <circle cx={274} cy={224} r={34} />
+      <path d="M228 352 C228 306 248 280 275 280 C302 280 322 306 322 352 Z" />
+    </svg>
+  );
+}

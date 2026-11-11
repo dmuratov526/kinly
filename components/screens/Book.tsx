@@ -5,7 +5,7 @@ import { Check, CreditCard, Minus, Plus, Repeat, ShoppingCart } from "lucide-rea
 import { useState } from "react";
 import { DAYS, FEE, TIMES, cartItem, day, endTime, helper, isFree, priceFor, rateFor, svc } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, Btn, Rating, ServiceScope, Sheet, SlideToConfirm, Tap, TopBar, Verified, spring } from "../kit";
+import { Avatar, Btn, Rating, ServiceScopeInfo, Sheet, SlideToConfirm, Tap, TopBar, Verified, spring } from "../kit";
 import { useStore } from "../store";
 
 export function Book() {
@@ -115,11 +115,9 @@ export function Book() {
             <span className={`switch ${draft.weekly ? "on" : ""}`}><motion.i layout transition={spring} /></span>
           </Tap>
 
-          <ServiceScope id={s.id} />
-
           {/* checklist */}
           <div>
-            <h3 className="label">What should {h.first} do?</h3>
+            <h3 className="label row" style={{ gap: 6 }}>What should {h.first} do? <ServiceScopeInfo id={s.id} /></h3>
             <div className="checklist">
               {draft.tasks.map((x, i) => (
                 <Tap key={x.t} className={`check-row ${x.on ? "on" : ""}`} onClick={() => setDraft({ tasks: draft.tasks.map((y, j) => (j === i ? { ...y, on: !y.on } : y)) })}>

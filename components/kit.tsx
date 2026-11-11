@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useTransform, animate, type PanInfo } from "motion/react";
-import { BadgeCheck, ChevronDown, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart, X } from "lucide-react";
+import { BadgeCheck, ChevronDown, ChevronLeft, ChevronsRight, Star, Check, ShieldCheck, ShoppingCart, X, Info } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "./store";
@@ -272,5 +272,25 @@ export function ServiceScope({ id, open: start = false }: { id: ServiceId; open?
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/** The same scope, tucked behind an (i) next to a heading. */
+export function ServiceScopeInfo({ id }: { id: ServiceId }) {
+  const s = svc(id);
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button className="info-dot" onClick={() => setOpen(true)} aria-label={`What ${s.name} covers`}><Info size={17} /></button>
+      <Sheet open={open} onClose={() => setOpen(false)} title={`What ${s.name} covers`}>
+        <div className="scope open" style={{ ["--hue" as string]: s.hue, ["--tint" as string]: s.tint }}>
+          <div className="scope-body" style={{ paddingTop: 14 }}>
+            {s.includes.map((x) => <div key={x} className="scope-row yes"><Check size={15} strokeWidth={3} />{x}</div>)}
+            {s.excludes.map((x) => <div key={x} className="scope-row no"><X size={15} strokeWidth={3} />{x}</div>)}
+          </div>
+        </div>
+        <Btn kind="soft" style={{ width: "100%", marginTop: 14 }} onClick={() => setOpen(false)}>Got it</Btn>
+      </Sheet>
+    </>
   );
 }

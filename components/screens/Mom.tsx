@@ -40,12 +40,6 @@ export function Mom() {
             <h1 className="mom-hello">Good afternoon,<br /><i>Kamala</i></h1>
           </div>
 
-          {/* one tap, then a calm yes / I'm okay. No press-and-hold, no countdown */}
-          <Tap className="mom-sos" onClick={() => setSos(true)}>
-            <b>I need help</b>
-            <span>Tap once</span>
-          </Tap>
-
           <motion.div className="mom-visit" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="mom-visit-top">
               <Avatar src={h.photo} size={104} ring="#22C55E" />
@@ -68,6 +62,12 @@ export function Mom() {
               </div>
             )}
           </motion.div>
+
+          {/* one tap, then a calm yes / I'm okay. No press-and-hold, no countdown */}
+          <Tap className="mom-sos" onClick={() => setSos(true)}>
+            <b>I need help</b>
+            <span>Tap once</span>
+          </Tap>
 
           <Tap className={`mom-pill ${pill ? "on" : ""}`} onClick={() => { setPill(!pill); if (!pill) toast("Rohan and Anita will see this", "check"); }}>
             <span className="mom-pill-ic">{pill ? <Check size={30} strokeWidth={3} /> : <Pill size={28} />}</span>
