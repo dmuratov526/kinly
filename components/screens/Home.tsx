@@ -5,7 +5,7 @@ import { Bell, Check, ChevronDown, ChevronRight, Globe, MapPin, MessageCircle, P
 import { useState } from "react";
 import { HELPERS, MOMS_USUAL, PEOPLE, SERVICES, cardRate, day, helper, priceFor, svc, type ServiceId } from "../data";
 import { ServiceGlyph } from "../icons";
-import { Avatar, CartButton, KinlySafe, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
+import { Avatar, CartButton, ConfirmBooking, KinlySafe, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
 import { useStore } from "../store";
 
 /** who you've booked before, and for what */
@@ -261,12 +261,13 @@ export function Home() {
   );
 }
 
-/** "Kamala's usual": the weekly check-in and her medicine refills, rebooked together in one tap. */
+/** "Kamala's usual": the weekly check-in and her medicine refills, rebooked together after one confirmation. */
 function MomsUsual() {
   const { visits, addVisit, toast, go } = useStore();
   const items = MOMS_USUAL.map((u) => ({ ...u, h: helper(u.helperId), s: svc(u.service), total: priceFor(helper(u.helperId), svc(u.service), u.hours).total }));
   const total = items.reduce((a, x) => a + x.total, 0);
   const booked = visits.some((v) => v.id === "usual-0");
+  const [confirming, setConfirming] = useState(false);
 
   const book = () => {
     items.forEach((x, i) => addVisit({
@@ -280,7 +281,7 @@ function MomsUsual() {
     <div className={`usual ${booked ? "done" : ""}`}>
       <div className="row between">
         <div>
-          <div className="eyebrow">One tap</div>
+          <div className="eyebrow">Quick rebook</div>
           <b className="usual-title">Kamala&apos;s usual</b>
         </div>
         <span className="usual-when"><Repeat size={12} /> Every {day(MOMS_USUAL[0].dayKey).dow}</span>
@@ -302,8 +303,10 @@ function MomsUsual() {
           <Check size={17} strokeWidth={3} /> Booked for {day(MOMS_USUAL[0].dayKey).label} · see Visits
         </Tap>
       ) : (
-        <Tap className="usual-btn" onClick={book}>Book both · ${total}</Tap>
+        <Tap className="usual-btn" onClick={() => setConfirming(true)}>Book both · ${total}</Tap>
       )}
+      <ConfirmBooking open={confirming} onClose={() => setConfirming(false)} title="Book Kamala's usual?" onConfirm={book}
+        rows={items.map((x) => ({ photo: x.h.photo, title: `${x.what} with ${x.h.first}`, sub: `${day(x.dayKey).label} · ${x.time.replace(":00", "")} · every week`, price: x.total }))} />
     </div>
   );
 }
@@ -317,16 +320,14 @@ function PersonAvatar({ p, size }: { p: { name: string; photo?: string }; size: 
 function Recs({ openHelper, openService }: { openHelper: (id: string, s?: ServiceId) => void; openService: (s: ServiceId) => void }) {
   const { visits, addVisit, toast } = useStore();
   const nextWeek = visits.some((v) => v.id === "rec-nov26");
+  const [confirming, setConfirming] = useState(false);
+  const nov26 = priceFor(helper("sunita"), svc("companion"), 3).total;
   const cards = [
     {
       key: "weekly", photo: helper("sunita").photo, tag: "Every Thursday",
       title: "Keep Thursdays with Sunita", sub: "Nov 19 is booked. Nov 26 is still open.",
       cta: nextWeek ? "Booked ✓" : "Book Nov 26", done: nextWeek,
-      go: () => {
-        if (nextWeek) return;
-        addVisit({ id: "rec-nov26", helperId: "sunita", service: "companion", dayKey: "thu3", dateLabel: "Thu, Nov 26", time: "2:00 PM", hours: 3, status: "upcoming", weekly: true, total: priceFor(helper("sunita"), svc("companion"), 3).total });
-        toast("Thu, Nov 26 with Sunita is booked", "check");
-      },
+      go: () => { if (!nextWeek) setConfirming(true); },
     },
     { key: "house", photo: helper("maria").photo, tag: "13 days ago", title: "Time for house help", sub: "Maria is free today at 4 PM, 0.8 mi away.", cta: "Book Maria", go: () => openHelper("maria", "home") },
     { key: "doctor", photo: helper("denise").photo, tag: "Due in 2 weeks", title: "Cardiology follow-up", sub: "Last checkup Oct 27. The doctor asked to recheck BP in 6 weeks.", cta: "Find a ride", go: () => openService("escort") },
@@ -351,6 +352,12 @@ function Recs({ openHelper, openService }: { openHelper: (id: string, s?: Servic
           </div>
         ))}
       </div>
+      <ConfirmBooking open={confirming} onClose={() => setConfirming(false)}
+        rows={[{ photo: helper("sunita").photo, title: "Companionship with Sunita", sub: "Thu, Nov 26 · 2–5 PM", price: nov26 }]}
+        onConfirm={() => {
+          addVisit({ id: "rec-nov26", helperId: "sunita", service: "companion", dayKey: "thu3", dateLabel: "Thu, Nov 26", time: "2:00 PM", hours: 3, status: "upcoming", weekly: true, total: nov26 });
+          toast("Thu, Nov 26 with Sunita is booked", "check");
+        }} />
     </div>
   );
 }
@@ -358,18 +365,24 @@ function Recs({ openHelper, openService }: { openHelper: (id: string, s?: Servic
 /** Kamala can ask for a visit from her own app; the family approves and pays. */
 function Requests() {
   const { requests, resolveRequest, addVisit, toast } = useStore();
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   if (!requests.length) return null;
   const WHEN: Record<string, { dayKey: string; time: string }> = {
     Today: { dayKey: "today", time: "4:00 PM" }, Tomorrow: { dayKey: "fri", time: "11:00 AM" }, "This week": { dayKey: "mon", time: "10:00 AM" },
   };
+  const plan = (r: (typeof requests)[number]) => {
+    const h = helper(r.helperId);
+    const s = svc(r.service);
+    const w = WHEN[r.when] ?? WHEN.Tomorrow;
+    const hours = s.unit === "visit" ? 1 : 2;
+    return { h, s, w, hours, total: priceFor(h, s, hours).total };
+  };
+  const pending = requests.find((r) => r.id === confirmId);
+  const pp = pending ? plan(pending) : null;
   return (
     <>
       {requests.map((r) => {
-        const h = helper(r.helperId);
-        const s = svc(r.service);
-        const w = WHEN[r.when] ?? WHEN.Tomorrow;
-        const hours = s.unit === "visit" ? 1 : 2;
-        const total = priceFor(h, s, hours).total;
+        const { h, s, total } = plan(r);
         return (
           <motion.div key={r.id} className="request" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="row" style={{ gap: 12 }}>
@@ -381,16 +394,20 @@ function Requests() {
               </div>
             </div>
             <div className="row" style={{ gap: 8 }}>
-              <Tap className="mini-btn dark" style={{ flex: 1, justifyContent: "center" }} onClick={() => {
-                addVisit({ id: `req-${r.id}`, helperId: h.id, service: s.id, dayKey: w.dayKey, dateLabel: day(w.dayKey).label, time: w.time, hours, status: "upcoming", total });
-                resolveRequest(r.id);
-                toast(`Booked. Kamala is told ${h.first} is coming`, "check");
-              }}><Check size={14} strokeWidth={3} /> Approve and book</Tap>
+              <Tap className="mini-btn dark" style={{ flex: 1, justifyContent: "center" }} onClick={() => setConfirmId(r.id)}><Check size={14} strokeWidth={3} /> Approve and book</Tap>
               <Tap className="mini-btn" onClick={() => toast("Calling Kamala…", "info")}><Phone size={14} /> Call her</Tap>
             </div>
           </motion.div>
         );
       })}
+      <ConfirmBooking open={!!pending} onClose={() => setConfirmId(null)} title="Approve Kamala's request?"
+        rows={pending && pp ? [{ photo: pp.h.photo, title: `${pp.s.name} with ${pp.h.first}`, sub: `${day(pp.w.dayKey).label} · ${pp.w.time.replace(":00", "")} · ${pending.what.toLowerCase()}`, price: pp.total }] : []}
+        onConfirm={() => {
+          if (!pending || !pp) return;
+          addVisit({ id: `req-${pending.id}`, helperId: pp.h.id, service: pp.s.id, dayKey: pp.w.dayKey, dateLabel: day(pp.w.dayKey).label, time: pp.w.time, hours: pp.hours, status: "upcoming", total: pp.total });
+          resolveRequest(pending.id);
+          toast(`Booked. Kamala is told ${pp.h.first} is coming`, "check");
+        }} />
     </>
   );
 }

@@ -294,3 +294,33 @@ export function ServiceScopeInfo({ id }: { id: ServiceId }) {
     </>
   );
 }
+
+/* ---------- one more look before anything is booked ---------- */
+
+export type ConfirmRow = { photo: string; title: string; sub: string; price: number };
+
+/** Every booking shortcut opens this first: a summary and a slide, so a stray tap never books. */
+export function ConfirmBooking({ open, onClose, title = "Book this visit?", rows, note, onConfirm }: {
+  open: boolean; onClose: () => void; title?: string; rows: ConfirmRow[]; note?: string; onConfirm: () => void;
+}) {
+  const total = rows.reduce((a, r) => a + r.price, 0);
+  return (
+    <Sheet open={open} onClose={onClose} title={title}>
+      <div className="stack-14">
+        {rows.map((r) => (
+          <div key={r.title + r.sub} className="cancel-card">
+            <Avatar src={r.photo} size={46} />
+            <div className="grow">
+              <b>{r.title}</b>
+              <span>{r.sub}</span>
+            </div>
+            <b>${r.price}</b>
+          </div>
+        ))}
+        <p className="cancel-note">{note ?? "Charged to Visa ·· 4242 after each visit. Free cancellation until 24 hrs before."}</p>
+        {open && <SlideToConfirm label={`Slide to book · $${total}`} onDone={() => { onClose(); onConfirm(); }} />}
+        <Btn kind="ghost" style={{ width: "100%" }} onClick={onClose}>Not now</Btn>
+      </div>
+    </Sheet>
+  );
+}
