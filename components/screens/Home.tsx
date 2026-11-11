@@ -165,8 +165,8 @@ export function Home() {
           })}
           <Tap className="again ghost" onClick={() => go("explore")}>
             <span className="again-add"><UserPlus size={22} /></span>
-            <b>Someone new</b>
-            <span>Browse 140+</span>
+            <b>New helper</b>
+            <span>Browse all</span>
           </Tap>
         </div>
       </Section>

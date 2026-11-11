@@ -336,13 +336,13 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 @keyframes heroShift { to { transform: scale(1.15) translate(-4%, 4%); } }
 .live-tag { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px 0 10px; border-radius: 999px; background: rgba(255, 255, 255, .14); backdrop-filter: blur(8px); font-size: 12px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: #FF9DBA; }
 .live-tag.done { color: #7DF0B8; padding-left: 12px; }
-.hero-time { font-size: 12.5px; color: rgba(255, 255, 255, .7); font-weight: 600; }
+.hero-time { font-size: 12.5px; color: rgba(255, 255, 255, .88); font-weight: 600; }
 .duo { display: flex; flex-shrink: 0; }
 .hero-title { font-size: 21px; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
-.hero-sub { font-size: 13px; color: rgba(255, 255, 255, .7); margin-top: 3px; }
+.hero-sub { font-size: 13px; line-height: 1.4; color: rgba(255, 255, 255, .9); margin-top: 8px; }
 .hero-progress { position: relative; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .14); margin-top: 18px; overflow: hidden; }
 .hero-progress div { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #FF8A4C, #FF4F7B, #FFB4C8); box-shadow: 0 0 12px rgba(255, 79, 123, .8); }
-.hero-foot { position: relative; margin-top: 12px; font-size: 12.5px; color: rgba(255, 255, 255, .7); }
+.hero-foot { position: relative; margin-top: 14px; font-size: 12.5px; color: rgba(255, 255, 255, .88); }
 .hero-foot span:last-child { color: #fff; }
 
 .searchbar { display: flex; align-items: center; gap: 12px; width: 100%; height: 58px; padding: 0 8px 0 18px; border-radius: 20px; background: var(--surface); box-shadow: var(--sh-2); color: var(--ink-3); font-size: 15.5px; text-align: left; }
@@ -370,8 +370,8 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .reminder b { font-size: 15px; letter-spacing: -.02em; }
 .reminder p { margin: 3px 0 0; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
 
-.again { position: relative; width: 108px; padding: 16px 10px 14px; border-radius: 22px; background: var(--surface); box-shadow: var(--sh-1); display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; }
-.again b { font-size: 14px; margin-top: 6px; }
+.again { position: relative; width: 108px; height: 138px; padding: 16px 10px 14px; justify-content: flex-start; border-radius: 22px; background: var(--surface); box-shadow: var(--sh-1); display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; }
+.again b { font-size: 14px; margin-top: 6px; white-space: nowrap; }
 .again span:not(.avatar):not(.again-plus):not(.again-add) { font-size: 11.5px; color: var(--ink-3); font-weight: 600; }
 .again-plus { position: absolute; top: 56px; left: 62px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 3px #fff; }
 .again.ghost { background: transparent; box-shadow: 0 0 0 1.5px #DDD7E2 inset; }
@@ -588,7 +588,7 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .visit { display: block; width: 100%; padding: 16px; border-radius: 24px; background: var(--surface); box-shadow: var(--sh-1); text-align: left; }
 .visit.live { padding: 0; overflow: hidden; background: linear-gradient(150deg, #33224F, #160F22); color: #fff; box-shadow: 0 20px 40px -18px rgba(42, 29, 63, .7); }
 .visit.live .visit-body { padding: 4px 18px 20px; }
-.visit.live .muted, .visit.live svg.muted { color: rgba(255, 255, 255, .65); }
+.visit.live .muted, .visit.live svg.muted { color: rgba(255, 255, 255, .88); }
 .visit-live-bar { display: flex; align-items: center; gap: 8px; padding: 16px 18px 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #FF9DBA; }
 .visit-progress { height: 4px; background: rgba(255, 255, 255, .12); }
 .visit-progress i { display: block; height: 100%; background: var(--brand); }
