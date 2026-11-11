@@ -169,7 +169,6 @@ export function Book() {
           </div>
           <p className="cancel-note">Charged to Visa ·· 4242 after the visit. Free cancellation until 24 hrs before.</p>
           <SlideToConfirm label={`Slide to book · $${yours}`} onDone={() => { setReviewing(false); confirm(); }} />
-          <Btn kind="soft" style={{ width: "100%" }} onClick={() => { setReviewing(false); toCart(); }}><ShoppingCart size={18} /> Add to cart instead</Btn>
         </div>
       </Sheet>
     </div>
