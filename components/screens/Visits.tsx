@@ -152,8 +152,8 @@ function VisitBody({ v }: { v: Visit }) {
           <b className="visit-title">{s.name}</b>
           {v.weekly && <span className="weekly"><Repeat size={11} /> Weekly</span>}
         </div>
-        <div className="muted small">{v.time} – {endTime(v.time, v.hours)} · ${v.total}</div>
-        <div className="row" style={{ gap: 6, marginTop: 6 }}>
+        <div className="muted small" style={{ marginTop: 4 }}>{v.time} – {endTime(v.time, v.hours)} · ${v.total}</div>
+        <div className="row" style={{ gap: 8, marginTop: 10 }}>
           <Avatar src={h.photo} size={22} />
           <span className="small">{h.first}</span>
           <ServiceGlyph id={v.service} size={22} radius={7} />
