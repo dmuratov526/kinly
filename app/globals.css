@@ -452,8 +452,8 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .day-strip::-webkit-scrollbar { display: none; }
 .day-pill { position: relative; flex-shrink: 0; width: 58px; height: 74px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: var(--surface); box-shadow: 0 0 0 1px var(--line) inset; }
 .day-pill > * { position: relative; z-index: 1; }
-.day-pill span { font-size: 11.5px; font-weight: 700; color: var(--ink-3); }
-.day-pill b { font-size: 20px; letter-spacing: -.03em; }
+.day-pill span { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.day-pill b { font-size: 18px; letter-spacing: -.01em; }
 .day-pill small { font-size: 9.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; }
 .day-pill.on { color: #fff; box-shadow: none; background: var(--ink); }
 .day-pill.on span { color: rgba(255, 255, 255, .7); }
@@ -565,9 +565,9 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .ticket-top { display: flex; align-items: center; gap: 14px; padding: 18px 18px 14px; background: linear-gradient(135deg, #2F2147, #1A1328); color: #fff; }
 .ticket-top b { display: block; font-size: 17px; }
 .ticket-top span { font-size: 13px; color: rgba(255, 255, 255, .7); }
-.ticket-grid { display: grid; grid-template-columns: 1.1fr 1.1fr 1fr; gap: 6px; padding: 16px 18px; }
-.ticket-grid span { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
-.ticket-grid b { font-size: 15px; letter-spacing: -.02em; }
+.ticket-grid { display: grid; grid-template-columns: 1.1fr 1.2fr .9fr; gap: 10px; padding: 16px 18px; }
+.ticket-grid span { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin-bottom: 3px; }
+.ticket-grid b { font-size: 13.5px; letter-spacing: 0; white-space: nowrap; }
 .ticket-cut { position: relative; height: 1px; margin: 0 18px; border-top: 2px dashed #E7E2EA; }
 .ticket-cut::before, .ticket-cut::after { content: ""; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg); }
 .ticket-cut::before { left: -30px; } .ticket-cut::after { right: -30px; }
@@ -593,9 +593,9 @@ kbd { font-family: inherit; font-size: 11px; padding: 3px 7px; border-radius: 6p
 .visit-progress { height: 4px; background: rgba(255, 255, 255, .12); }
 .visit-progress i { display: block; height: 100%; background: var(--brand); }
 .visit-body { display: flex; align-items: center; gap: 14px; }
-.date-tile { width: 56px; height: 62px; border-radius: 18px; background: var(--tint); color: var(--hue); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-.date-tile span { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.date-tile b { font-size: 22px; letter-spacing: -.04em; color: var(--ink); line-height: 1.05; }
+.date-tile { width: 56px; height: 62px; border-radius: 18px; background: var(--tint); color: var(--hue); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; flex-shrink: 0; }
+.date-tile span { font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.date-tile b { font-size: 19px; letter-spacing: -.01em; color: var(--ink); line-height: 1.1; }
 .visit.live .date-tile { background: rgba(255, 255, 255, .12); color: #FF9DBA; }
 .visit.live .date-tile b { color: #fff; }
 .visit-title { font-size: 16px; letter-spacing: -.02em; }
