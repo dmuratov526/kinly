@@ -370,8 +370,11 @@ export type Visit = {
   total: number;
 };
 
+/** A visit for today, used when the demo jumps straight to the live screens without booking first. */
+export const DEMO_LIVE: Visit = { id: "v-live", helperId: "sunita", service: "companion", dayKey: "today", dateLabel: "Today", time: "2:00 PM", hours: 3, status: "live", weekly: true, total: totalFor("sunita", "companion", 3) };
+
+/** Nothing is happening today until Rohan books it: the live visit appears during the demo. */
 export const SEED_VISITS: Visit[] = [
-  { id: "v-live", helperId: "sunita", service: "companion", dayKey: "today", dateLabel: "Today", time: "2:00 PM", hours: 3, status: "live", weekly: true, total: totalFor("sunita", "companion", 3) },
   { id: "v2", helperId: "denise", service: "escort", dayKey: "tue", dateLabel: "Tue, Nov 17", time: "10:00 AM", hours: 2, status: "upcoming", total: totalFor("denise", "escort", 2) },
   { id: "v3", helperId: "sunita", service: "companion", dayKey: "thu2", dateLabel: "Thu, Nov 19", time: "2:00 PM", hours: 3, status: "upcoming", weekly: true, total: totalFor("sunita", "companion", 3) },
   { id: "p1", helperId: "sunita", service: "companion", dayKey: "p1", dateLabel: "Thu, Nov 5", time: "2:00 PM", hours: 3, status: "past", weekly: true, rated: 5, summary: "Walked to the park, played rummy, Kamala won twice.", total: totalFor("sunita", "companion", 3) },

@@ -11,8 +11,8 @@ import { useStore, type LiveStage } from "../store";
 const STAGES = ["On the way", "Arrived", "With Kamala", "Done"];
 
 export function Live() {
-  const { live, setLive, back, go, toast, openChat } = useStore();
-  const h = helper("sunita");
+  const { live, setLive, back, go, toast, openChat, visits } = useStore();
+  const h = helper(visits.find((v) => v.status === "live")?.helperId ?? "sunita");
   const { p, mins } = useDrive(true);
   const [sos, setSos] = useState(false);
   const fire = useCallback(() => { setSos(false); go("emergency"); }, [go]);
@@ -58,7 +58,8 @@ export function Live() {
           <Avatar src={h.photo} size={52} online />
           <div className="grow">
             <b>{h.name}</b>
-            <div className="row" style={{ gap: 8 }}><Rating value={h.rating} /><span className="small muted">Toyota Corolla · KXT 2291</span></div>
+            <Rating value={h.rating} />
+            <div className="small muted" style={{ marginTop: 2, whiteSpace: "nowrap" }}>Toyota Corolla · KXT 2291</div>
           </div>
           <Tap className="round-btn" onClick={() => toast(`Calling ${h.first}…`, "info")} aria-label="Call"><Phone size={19} /></Tap>
           <Tap className="round-btn" onClick={() => openChat(h.id)} aria-label="Chat"><MessageCircle size={19} /></Tap>

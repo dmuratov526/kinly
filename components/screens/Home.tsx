@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Bell, Check, ChevronDown, ChevronRight, Globe, MapPin, MessageCircle, Phone, Plus, Repeat, Search, ShieldCheck, Sparkles, UserPlus } from "lucide-react";
 import { useState } from "react";
-import { HELPERS, MOMS_USUAL, PEOPLE, SERVICES, cardRate, day, helper, priceFor, svc, type ServiceId } from "../data";
+import { HELPERS, MOMS_USUAL, PEOPLE, SERVICES, cardRate, day, endTime, helper, priceFor, svc, type ServiceId } from "../data";
 import { ServiceGlyph } from "../icons";
 import { Avatar, CartButton, ConfirmBooking, KinlySafe, Rating, Rise, Section, Sheet, Stagger, Tap, Verified } from "../kit";
 import { useStore } from "../store";
@@ -12,14 +12,15 @@ import { useStore } from "../store";
 const AGAIN = { sunita: "companion", maria: "home", denise: "escort", tom: "tech", marcus: "errands" } as const;
 
 const LIVE_COPY = [
-  { tag: "On the way", title: "Sunita is 6 min away", sub: "Arriving at Kamala's around 1:58 PM", pct: 12 },
-  { tag: "Arrived", title: "Sunita just checked in", sub: "PIN verified at the door · 2:01 PM", pct: 30 },
-  { tag: "Live now", title: "Sunita is with Kamala", sub: "1 hr 12 min in · 2 of 4 tasks done", pct: 58 },
+  { tag: "On the way", title: "{name} is 6 min away", sub: "Arriving at Kamala's around 1:58 PM", pct: 12 },
+  { tag: "Arrived", title: "{name} just checked in", sub: "PIN verified at the door · 2:01 PM", pct: 30 },
+  { tag: "Live now", title: "{name} is with Kamala", sub: "1 hr 12 min in · 2 of 4 tasks done", pct: 58 },
   { tag: "Finished", title: "Visit report is ready", sub: "Kamala had a lovely afternoon", pct: 100 },
 ];
 
 export function Home() {
-  const { go, live, setExplore, setDraft, toast, showSafe, showLang, openChat } = useStore();
+  const { go, live, setExplore, setDraft, toast, showSafe, showLang, openChat, visits } = useStore();
+  const liveVisit = visits.find((v) => v.status === "live");
   const [careSheet, setCareSheet] = useState(false);
   const [people, setPeople] = useState<{ name: string; photo?: string }[]>([{ name: "Kamala", photo: PEOPLE.mom.photo }]);
   const [who, setWho] = useState(0);
@@ -35,8 +36,8 @@ export function Home() {
     setCareSheet(false);
     toast(`${name} added. You can book help for them now`, "check");
   };
-  const L = LIVE_COPY[live];
-  const sunita = helper("sunita");
+  const sunita = helper(liveVisit?.helperId ?? "sunita");
+  const L = { ...LIVE_COPY[live], title: LIVE_COPY[live].title.replace("{name}", sunita.first) };
 
   const openService = (id: (typeof SERVICES)[number]["id"]) => {
     setExplore({ service: id, when: null, focus: false });
@@ -86,8 +87,8 @@ export function Home() {
         {/* visits Kamala asked for from her own app */}
         <Requests />
 
-        {/* live / next visit hero */}
-        <Rise>
+        {/* the visit happening today: appears once Rohan books one */}
+        {liveVisit && <Rise>
           <Tap className="hero-card" onClick={() => go(live === 3 ? "report" : "live")} style={{ width: "100%" }}>
             <div className="hero-aurora" />
             <div className="row between" style={{ position: "relative" }}>
@@ -95,7 +96,7 @@ export function Home() {
                 {live < 3 && <span className="pulse-dot" />}
                 {L.tag}
               </span>
-              <span className="hero-time">Companionship · 2–5 PM</span>
+              <span className="hero-time">{svc(liveVisit.service).name} · {liveVisit.time.replace(":00", "").replace(" PM", "").replace(" AM", "")}–{endTime(liveVisit.time, liveVisit.hours).replace(":00", "")}</span>
             </div>
             <div className="row" style={{ gap: 14, marginTop: 18, position: "relative" }}>
               <div className="duo">
@@ -115,7 +116,7 @@ export function Home() {
               <span className="row" style={{ gap: 4, fontWeight: 700 }}>{live === 3 ? "Open report" : "Track live"} <ChevronRight size={16} /></span>
             </div>
           </Tap>
-        </Rise>
+        </Rise>}
 
         {/* search */}
         <Rise>

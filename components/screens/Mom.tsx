@@ -5,7 +5,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronLeft, Coffee, Globe, Navigation, Phone, Pill, ShoppingBasket, Sparkles, Stethoscope, Sun, type LucideIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { PEOPLE, helper, type ServiceId } from "../data";
+import { DAYS, PEOPLE, helper, type ServiceId } from "../data";
 import { StreetMap, useDrive } from "../map";
 import { Avatar, HelpAsk, Tap } from "../kit";
 import { useStore } from "../store";
@@ -18,8 +18,10 @@ const ASK: { id: string; label: string; service: ServiceId; helperId: string; Ic
 ];
 
 export function Mom() {
-  const { go, toast, live, showLang, addRequest, requests, resolveRequest } = useStore();
-  const h = helper("sunita");
+  const { go, toast, live, showLang, addRequest, requests, resolveRequest, visits } = useStore();
+  const today = visits.find((v) => v.status === "live");
+  const nextUp = visits.filter((v) => v.status === "upcoming").sort((a, b) => DAYS.findIndex((d) => d.key === a.dayKey) - DAYS.findIndex((d) => d.key === b.dayKey))[0];
+  const h = helper(today?.helperId ?? nextUp?.helperId ?? "sunita");
   const { p, mins } = useDrive(true);
   const [asking, setAsking] = useState<(typeof ASK)[number] | null>(null);
   const [cancelling, setCancelling] = useState<(typeof ASK)[number] | null>(null);
@@ -44,12 +46,12 @@ export function Mom() {
             <div className="mom-visit-top">
               <Avatar src={h.photo} size={104} ring="#22C55E" />
               <div className="mom-visit-text">
-                <span>{live === 0 ? "Coming today" : live === 3 ? "Visited today" : "Here with you"}</span>
-                <b>Sunita</b>
-                <em>{live === 0 ? `${mins} minute${mins === 1 ? "" : "s"} away` : live === 3 ? "See you next Thursday" : "until 5:00"}</em>
+                <span>{!today ? "Next visit" : live === 0 ? "Coming today" : live === 3 ? "Visited today" : "Here with you"}</span>
+                <b>{h.first}</b>
+                <em>{!today ? (nextUp ? `${nextUp.dateLabel} at ${nextUp.time.replace(":00", "")}` : "Nothing booked yet") : live === 0 ? `${mins} minute${mins === 1 ? "" : "s"} away` : live === 3 ? "See you next Thursday" : "until 5:00"}</em>
               </div>
             </div>
-            {live === 0 && (
+            {today && live === 0 && (
               <div className="mom-code-row">
                 <div className="mom-code">
                   <span>Ask her for your code</span>

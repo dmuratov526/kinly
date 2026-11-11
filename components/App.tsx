@@ -3,7 +3,7 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { BatteryFull, CalendarDays, Check, Compass, Globe, HeartPulse, Heart, House, IdCard, Info, ListOrdered, ShieldCheck, ShoppingCart, Signal, Umbrella, Wifi, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
-import { DEMO_CART, SEED_VISITS, day, svc, type CartItem, type Visit } from "./data";
+import { DEMO_CART, DEMO_LIVE, SEED_VISITS, day, svc, type CartItem, type Visit } from "./data";
 import { Btn, CountBadge, Sheet, softSpring } from "./kit";
 import { NO_FILTERS, StoreCtx, TAB_ROOTS, useStore, type Draft, type LiveStage, type MomRequest, type ScreenId, type Store } from "./store";
 import { KinlyMark } from "./icons";
@@ -106,10 +106,27 @@ export default function App() {
     setDir(0);
     setStack([id]);
   }, []);
+  /** A booking for today becomes the live visit (one at a time); the live story restarts from "on the way". */
+  const placeVisits = useCallback((incoming: Visit[]) => {
+    setVisits((vs) => {
+      let hasLive = vs.some((x) => x.status === "live");
+      let started = false;
+      const added = incoming.map((v) => {
+        if (v.dayKey === "today" && !hasLive) { hasLive = true; started = true; return { ...v, status: "live" as const }; }
+        return v;
+      });
+      if (started) setTimeout(() => setLive(0), 0);
+      const ids = new Set(added.map((v) => v.id));
+      return [...vs.filter((x) => !ids.has(x.id)), ...added].sort((a, b) => (a.status === "live" ? -1 : b.status === "live" ? 1 : 0));
+    });
+  }, [setLive]);
   const jump = useCallback((id: ScreenId) => {
     history.replaceState(null, "", `#${id}`);
     setDir(0);
-    if (id === "live" || id === "mom") setLive(0);
+    if (["live", "mom", "momMap", "emergency"].includes(id)) {
+      setVisits((vs) => (vs.some((x) => x.status === "live") ? vs : [DEMO_LIVE, ...vs]));
+      setLive(0);
+    }
     if (id === "cart") setCart((c) => (c.length ? c : DEMO_CART));
     if (id === "confirmed") setLastBooking([]);
     if (id === "helper" || id === "book") setDraftState((d) => ({ ...d, helperId: "sunita", service: "companion", tasks: svc("companion").tasks, dayKey: "today", time: "2:00 PM" }));
@@ -120,6 +137,7 @@ export default function App() {
   useEffect(() => {
     const h = location.hash.slice(1) as ScreenId;
     if (h in SCREENS) setStack(stackFor(h));
+    if (["live", "mom", "momMap", "emergency"].includes(h)) setVisits((vs) => (vs.some((x) => x.status === "live") ? vs : [DEMO_LIVE, ...vs]));
     const onPop = () => {
       const t = location.hash.slice(1) as ScreenId;
       setDir(-1);
@@ -142,14 +160,14 @@ export default function App() {
     screen, dir, go, back, tab, toast,
     draft, setDraft: (p) => setDraftState((d) => ({ ...d, ...p })),
     explore, setExplore: (p) => setExploreState((e) => ({ ...e, ...p })),
-    visits, addVisit: (v) => setVisits((vs) => [...vs.filter((x) => x.status !== "upcoming" || x.id !== v.id), v].sort((a, b) => (a.status === "live" ? -1 : b.status === "live" ? 1 : 0))),
+    visits, addVisit: (v) => placeVisits([v]),
     cancelVisit: (id) => setVisits((vs) => vs.filter((v) => v.id !== id)),
     visitId, openVisit: (id) => { setVisitId(id); go("visit"); },
     cart,
     addToCart: (c) => setCart((cs) => [...cs.filter((x) => x.id !== c.id), c]),
     removeFromCart: (id) => setCart((cs) => cs.filter((x) => x.id !== id)),
     checkout: () => {
-      setVisits((vs) => [...vs, ...cart.map(toVisit)]);
+      placeVisits(cart.map(toVisit));
       setLastBooking(cart);
       setCart([]);
       go("confirmed");
@@ -408,7 +426,8 @@ function SafeSheet({ onClose }: { onClose: () => void }) {
 }
 
 function TabBar() {
-  const { screen, tab, live, cart } = useStore();
+  const { screen, tab, live, cart, visits } = useStore();
+  const hasLive = visits.some((v) => v.status === "live");
   const tabs = [
     { id: "home" as const, label: "Home", Icon: House },
     { id: "explore" as const, label: "Explore", Icon: Compass },
@@ -425,7 +444,7 @@ function TabBar() {
               {on && <motion.span layoutId="tab-bg" className="tab-bg" transition={{ type: "spring", stiffness: 500, damping: 36 }} />}
               <Icon size={21} strokeWidth={on ? 2.4 : 2} />
               <span>{label}</span>
-              {id === "visits" && live < 3 && <span className="tab-live" />}
+              {id === "visits" && hasLive && live < 3 && <span className="tab-live" />}
               {id === "cart" && <CountBadge n={cart.length} />}
             </button>
           );
